@@ -68,6 +68,88 @@
             margin-top: 16px;
         }
 
+        /* Панель редактирования */
+        .edit-panel {
+            background: #f0f0f0;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .edit-panel h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .edit-panel .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .edit-panel .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .edit-panel label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .edit-panel input {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .edit-panel button {
+            padding: 8px 16px;
+            background: #06f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .edit-panel button:hover {
+            background: #0050cc;
+        }
+
+        .qr-button {
+            background: #0a5 !important;
+        }
+
+        .qr-button:hover {
+            background: #085 !important;
+        }
+
+        .qr-container {
+            margin-top: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .qr-container p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .qr-link {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 8px;
+        }
+
         /* Кнопка Сведения об ЭП */
         .ep-button-wrapper {
             margin-top: 24px;
@@ -108,7 +190,6 @@
             transform: translate(-50%, -65%) rotate(45deg);
         }
 
-        /* Скрываемые блоки с сертификатами */
         .signature-hidden {
             display: none;
         }
@@ -117,7 +198,6 @@
             display: block;
         }
 
-        /* Кнопка скрыта после нажатия */
         .ep-button-wrapper--hidden {
             display: none;
         }
@@ -207,6 +287,16 @@
             .ml-32 {
                 margin-left: 0;
             }
+            .edit-panel .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .edit-panel .field {
+                width: 100%;
+            }
+            .edit-panel input {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -219,6 +309,33 @@
 
     <div class="main">
         <div class="content">
+            <!-- Панель редактирования данных -->
+            <div class="edit-panel">
+                <h3>⚙️ Редактировать данные справки</h3>
+                <div class="form-row">
+                    <div class="field">
+                        <label>ФИО пациента</label>
+                        <input type="text" id="editPatient" placeholder="ФИО пациента">
+                    </div>
+                    <div class="field">
+                        <label>Дата оформления</label>
+                        <input type="date" id="editDate">
+                    </div>
+                    <div class="field">
+                        <label>ФИО врача</label>
+                        <input type="text" id="editDoctor" placeholder="ФИО врача">
+                    </div>
+                    <button id="applyBtn">Применить</button>
+                    <button id="showQrBtn" class="qr-button">📱 Показать QR-код</button>
+                </div>
+                <div id="qrContainer" class="qr-container">
+                    <p>📱 QR-код для этой справки:</p>
+                    <div id="qrCanvas"></div>
+                    <p class="qr-link" id="qrLink"></p>
+                </div>
+            </div>
+
+            <!-- Данные справки -->
             <div class="document-html">
                 <div class="xslt_11859s">
                     <div class="xslt_section">
@@ -310,21 +427,102 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
-    // Кнопка "Сведения об ЭП" — после нажатия пропадает и разворачивает
+    // ========== Кнопка "Сведения об ЭП" (пропадает после нажатия) ==========
     const toggleButton = document.getElementById('toggleEpButton');
     const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
 
     toggleButton.addEventListener('click', function() {
-        // Показываем сертификаты
         signaturesContainer.classList.remove('signature-hidden');
         signaturesContainer.classList.add('signature-visible');
-        // Прячем кнопку
         epButtonWrapper.classList.add('ep-button-wrapper--hidden');
     });
 
-    // Получение параметров из URL
+    // ========== Панель редактирования ==========
+    const editPatient = document.getElementById('editPatient');
+    const editDate = document.getElementById('editDate');
+    const editDoctor = document.getElementById('editDoctor');
+    const applyBtn = document.getElementById('applyBtn');
+    const showQrBtn = document.getElementById('showQrBtn');
+    const qrContainer = document.getElementById('qrContainer');
+    const qrCanvas = document.getElementById('qrCanvas');
+    const qrLinkSpan = document.getElementById('qrLink');
+    let currentQr = null;
+
+    // Функция обновления страницы
+    function updatePageData(patient, date, doctor) {
+        if (patient !== undefined && patient !== '') {
+            document.getElementById('patientName').innerText = patient;
+        }
+        if (date !== undefined && date !== '') {
+            document.getElementById('issueDate').innerText = date;
+        }
+        if (doctor !== undefined && doctor !== '') {
+            document.getElementById('doctorName').innerText = doctor;
+        }
+    }
+
+    // Кнопка "Применить"
+    applyBtn.addEventListener('click', function() {
+        const patient = editPatient.value;
+        const date = editDate.value;
+        const doctor = editDoctor.value;
+        
+        updatePageData(patient, date, doctor);
+        
+        // Скрываем QR-контейнер при изменении данных
+        qrContainer.style.display = 'none';
+    });
+
+    // Кнопка "Показать QR-код"
+    showQrBtn.addEventListener('click', function() {
+        const currentPatient = document.getElementById('patientName').innerText;
+        const currentDate = document.getElementById('issueDate').innerText;
+        const currentDoctor = document.getElementById('doctorName').innerText;
+        const currentDoctorCert = document.getElementById('doctorCert').innerText;
+        const currentDoctorValid = document.getElementById('doctorValid').innerText;
+        const currentOrgCert = document.getElementById('orgCert').innerText;
+        const currentOrgValid = document.getElementById('orgValid').innerText;
+        const currentOrgName = document.getElementById('orgName').innerText;
+        const currentOrgFullName = document.getElementById('orgFullName').innerText;
+        const currentAddress = document.getElementById('address').innerText;
+        const currentOgrn = document.getElementById('ogrn').innerText;
+        
+        // Формируем ссылку с параметрами
+        const baseUrl = window.location.origin + window.location.pathname;
+        const params = new URLSearchParams({
+            patient: currentPatient,
+            date: currentDate,
+            doctor: currentDoctor,
+            doctorCert: currentDoctorCert,
+            doctorValid: currentDoctorValid,
+            orgCert: currentOrgCert,
+            orgValid: currentOrgValid,
+            medicalOrg: currentOrgName,
+            orgName: currentOrgFullName,
+            address: currentAddress,
+            ogrn: currentOgrn
+        });
+        
+        const qrUrl = baseUrl + '?' + params.toString();
+        qrLinkSpan.innerText = qrUrl;
+        
+        // Очищаем старый QR
+        qrCanvas.innerHTML = '';
+        
+        // Создаём новый QR
+        currentQr = new QRCode(qrCanvas, {
+            text: qrUrl,
+            width: 150,
+            height: 150
+        });
+        
+        qrContainer.style.display = 'block';
+    });
+
+    // ========== Получение параметров из URL ==========
     function getUrlParameter(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
@@ -339,9 +537,14 @@
         }
     }
 
-    setElementValue('patientName', getUrlParameter('patient'), 'Ксения Викторовна П.');
-    setElementValue('issueDate', getUrlParameter('date'), '2026-03-02');
-    setElementValue('doctorName', getUrlParameter('doctor'), 'Цицава Людмила');
+    // Применяем параметры из URL (если есть)
+    const urlPatient = getUrlParameter('patient');
+    const urlDate = getUrlParameter('date');
+    const urlDoctor = getUrlParameter('doctor');
+    
+    setElementValue('patientName', urlPatient, 'Ксения Викторовна П.');
+    setElementValue('issueDate', urlDate, '2026-03-02');
+    setElementValue('doctorName', urlDoctor, 'Цицава Людмила');
     setElementValue('doctorCert', getUrlParameter('doctorCert'), '1832820349536861278881725538315849685825');
     setElementValue('doctorValid', getUrlParameter('doctorValid'), 'с 11.12.2025 по 11.03.2027');
     setElementValue('orgCert', getUrlParameter('orgCert'), '96403703493897758531285374117963780380');
@@ -349,7 +552,6 @@
     setElementValue('orgFullName', getUrlParameter('orgName'), 'ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ УЧРЕЖДЕНИЕ ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ "ГОРОДСКАЯ ПОЛИКЛИНИКА № 8 ДЕПАРТАМЕНТА ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ"');
     setElementValue('address', getUrlParameter('address'), 'г. Москва, Мичуринский проспект, Олимпийская деревня, дом 16, корп. 1');
     setElementValue('ogrn', getUrlParameter('ogrn'), '1037739410928');
-    setElementValue('docName', getUrlParameter('docName'), 'Справка о временной нетрудоспособности студента, учащегося техникума, профессионально-технического училища, о болезни, карантине и прочих причинах отсутствия ребенка, посещающего школу, детское дошкольное учреждение');
     setElementValue('orgName', getUrlParameter('medicalOrg'), 'ГП 8 Ф 2 (ГП 124)');
 </script>
 
