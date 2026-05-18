@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Проверка документа по QR-коду</title>
+    <title>Администратор — генератор QR для справок</title>
     <style>
         * {
             margin: 0;
@@ -297,6 +297,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -326,9 +327,10 @@
                     <button id="showQrBtn" class="qr-button">📱 Показать QR-код</button>
                 </div>
                 <div id="qrContainer" class="qr-container">
-                    <p>📱 QR-код для этой справки:</p>
+                    <p>📱 QR-код для справки (сканер покажет чистую страницу):</p>
                     <div id="qrCanvas"></div>
                     <p class="qr-link" id="qrLink"></p>
+                    <button id="downloadQrBtn" style="margin-top: 12px; padding: 6px 12px; background: #06f; color: white; border: none; border-radius: 6px; cursor: pointer;">💾 Скачать QR-код (PNG)</button>
                 </div>
             </div>
 
@@ -422,31 +424,30 @@
 </div>
 
 <script>
-    // Функция для генерации QR-кода (встроенная, без внешних библиотек)
-    function generateQR(text, canvasId) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
+    // Функция для генерации QR с помощью библиотеки qrcodejs
+    function generateQRCode(text, elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
         
-        // Очищаем canvas
-        canvas.innerHTML = '';
+        // Очищаем элемент
+        element.innerHTML = '';
         
-        // Создаём новый canvas элемент
-        const qrCanvas = document.createElement('canvas');
-        qrCanvas.width = 150;
-        qrCanvas.height = 150;
-        canvas.appendChild(qrCanvas);
-        
-        // Используем API Google Charts для генерации QR (простой и надёжный)
-        const img = document.createElement('img');
-        img.src = `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(text)}&choe=UTF-8`;
-        img.width = 150;
-        img.height = 150;
-        img.style.border = '1px solid #ddd';
-        img.style.padding = '8px';
-        img.style.backgroundColor = 'white';
-        
-        canvas.innerHTML = '';
-        canvas.appendChild(img);
+        // Создаём новый QR
+        try {
+            new QRCode(element, {
+                text: text,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            return true;
+        } catch(e) {
+            console.error('Ошибка генерации QR:', e);
+            element.innerHTML = '<p style="color: red;">Ошибка генерации QR. Попробуйте обновить страницу.</p>';
+            return false;
+        }
     }
 
     // Кнопка "Сведения об ЭП"
@@ -471,6 +472,9 @@
     const qrContainer = document.getElementById('qrContainer');
     const qrCanvas = document.getElementById('qrCanvas');
     const qrLinkSpan = document.getElementById('qrLink');
+    const downloadQrBtn = document.getElementById('downloadQrBtn');
+
+    let currentQrUrl = '';
 
     function updatePageData(patient, date, doctor) {
         if (patient !== undefined && patient !== '') {
@@ -511,6 +515,7 @@
             const currentAddress = document.getElementById('address').innerText;
             const currentOgrn = document.getElementById('ogrn').innerText;
             
+            // Ссылка на ЧИСТУЮ страницу (view.html)
             const baseUrl = window.location.origin + '/spravka/view.html';
             const params = new URLSearchParams({
                 patient: currentPatient,
@@ -526,15 +531,32 @@
                 ogrn: currentOgrn
             });
             
-            const qrUrl = baseUrl + '?' + params.toString();
-            if (qrLinkSpan) qrLinkSpan.innerText = qrUrl;
+            currentQrUrl = baseUrl + '?' + params.toString();
+            if (qrLinkSpan) qrLinkSpan.innerText = currentQrUrl;
             
             // Генерируем QR
             if (qrCanvas) {
-                generateQR(qrUrl, 'qrCanvas');
+                generateQRCode(currentQrUrl, 'qrCanvas');
             }
             
             if (qrContainer) qrContainer.style.display = 'block';
+        });
+    }
+
+    // Скачивание QR-кода
+    if (downloadQrBtn) {
+        downloadQrBtn.addEventListener('click', function() {
+            const canvas = document.querySelector('#qrCanvas canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                const patientName = document.getElementById('patientName').innerText;
+                const fileName = `qr_${patientName.replace(/[^а-яА-Яa-zA-Z]/g, '_')}.png`;
+                link.download = fileName;
+                link.href = canvas.toDataURL();
+                link.click();
+            } else {
+                alert('Сначала сгенерируйте QR-код!');
+            }
         });
     }
 
