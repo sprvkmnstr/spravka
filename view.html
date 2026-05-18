@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка документа по QR-коду</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            font-weight: 400;
+            background: #f5f6f7;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .header {
+            padding: 30px 0;
+            max-width: 1180px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .main {
+            flex: 1 1 auto;
+            padding: 24px;
+            background: #f5f6f7;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            padding: 24px;
+            border-radius: 15px;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .document-html, .signature-html {
+            width: 100%;
+        }
+
+        .xslt_11859s {
+            font-family: 'Open Sans', Roboto, Arial, sans-serif;
+            line-height: 24px;
+            font-size: 16px;
+            color: #12171F;
+        }
+
+        .xslt_text_bold {
+            font-weight: bold;
+        }
+
+        .xslt_section:not(:first-child) {
+            margin-top: 16px;
+        }
+
+        .ep-button-wrapper {
+            margin-top: 24px;
+            border-top: 1px solid #E7E8E9;
+            padding-top: 16px;
+        }
+
+        .ep-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #06f;
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 24px;
+            cursor: pointer;
+        }
+
+        .ep-button__icon {
+            width: 20px;
+            height: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .ep-button__icon:before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #06f;
+            border-bottom: 2px solid #06f;
+            transform: translate(-50%, -65%) rotate(45deg);
+        }
+
+        .signature-hidden {
+            display: none;
+        }
+
+        .signature-visible {
+            display: block;
+        }
+
+        .ep-button-wrapper--hidden {
+            display: none;
+        }
+
+        .signature-block {
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        .xslt_signature {
+            margin-top: 16px;
+            border-top: 1px solid #E7E8E9;
+        }
+
+        .signature-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 16px;
+        }
+
+        .signature-field {
+            margin-top: 16px;
+        }
+
+        .signature-field-label {
+            font-weight: bold;
+        }
+
+        .signature-field-value {
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        .desktop-footer {
+            display: flex;
+            align-items: center;
+            padding: 76px 0;
+            max-width: 1180px;
+            width: 90%;
+            margin: 0 auto;
+            justify-content: space-between;
+        }
+
+        .desktop-footer-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-footer-text {
+            color: #696969;
+            white-space: pre-line;
+            margin: 0 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .desktop-footer-icon {
+            max-height: 64px;
+        }
+
+        .ml-32 {
+            margin-left: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px 16px;
+                width: 100%;
+            }
+            .main {
+                padding: 24px 16px;
+            }
+            .content {
+                padding: 20px;
+            }
+            .desktop-footer {
+                flex-direction: column;
+                padding: 40px 16px;
+                gap: 24px;
+                text-align: center;
+            }
+            .desktop-footer-icons {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 16px;
+            }
+            .ml-32 {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="header">
+        <img src="emias_logo_color.svg" alt="ЕМИАС">
+    </div>
+
+    <div class="main">
+        <div class="content">
+            <div class="document-html">
+                <div class="xslt_11859s">
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Наименование</div>
+                        <div style="margin-top: 4px;" id="docName">Справка о временной нетрудоспособности студента, учащегося техникума, профессионально-технического училища, о болезни, карантине и прочих причинах отсутствия ребенка, посещающего школу, детское дошкольное учреждение</div>
+                    </div>
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Пациент</div>
+                        <div style="margin-top: 4px;" id="patientName">Ксения Викторовна П.</div>
+                    </div>
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Наименование медицинской организации</div>
+                        <div style="margin-top: 4px;" id="orgName">ГП 8 Ф 2 (ГП 124)</div>
+                    </div>
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Дата оформления</div>
+                        <div style="margin-top: 4px;" id="issueDate">2026-03-02</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ep-button-wrapper" id="epButtonWrapper">
+                <button class="ep-button" id="toggleEpButton">
+                    <span class="ep-button__icon"></span>
+                    <span>Сведения об ЭП</span>
+                </button>
+            </div>
+
+            <div id="signaturesContainer" class="signature-hidden">
+                <div class="signature-block">
+                    <div class="signature-html">
+                        <div class="xslt_11859s">
+                            <div class="xslt_signature">
+                                <div class="signature-title">Сертификат медицинского работника</div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Сертификат</div>
+                                    <div class="signature-field-value" id="doctorCert">1832820349536861278881725538315849685825</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">ФИО работника</div>
+                                    <div class="signature-field-value" id="doctorName">Цицава Людмила</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Дата действия</div>
+                                    <div class="signature-field-value" id="doctorValid">с 11.12.2025 по 11.03.2027</div>
+                                </div>
+                            </div>
+
+                            <div class="xslt_signature">
+                                <div class="signature-title">Сертификат медицинской организации</div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Сертификат</div>
+                                    <div class="signature-field-value" id="orgCert">96403703493897758531285374117963780380</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Наименование организации</div>
+                                    <div class="signature-field-value" id="orgFullName">ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ УЧРЕЖДЕНИЕ ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ "ГОРОДСКАЯ ПОЛИКЛИНИКА № 8 ДЕПАРТАМЕНТА ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ"</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">ОГРН</div>
+                                    <div class="signature-field-value" id="ogrn">1037739410928</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Адрес</div>
+                                    <div class="signature-field-value" id="address">г. Москва, Мичуринский проспект, Олимпийская деревня, дом 16, корп. 1</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Дата действия</div>
+                                    <div class="signature-field-value" id="orgValid">с 17.11.2025 по 10.02.2027</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="desktop-footer">
+        <img src="emias_logo_color.svg" alt="ЕМИАС">
+        <div class="desktop-footer-icons">
+            <img src="mosru-logo.svg" alt="mos.ru">
+            <img src="dit2x.svg" alt="ДИТ" class="ml-32">
+            <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
+            <img src="mosmedlogo.svg" alt="Московская медицина" class="ml-32 desktop-footer-icon">
+        </div>
+    </div>
+</div>
+
+<script>
+    // Кнопка "Сведения об ЭП"
+    const toggleButton = document.getElementById('toggleEpButton');
+    const epButtonWrapper = document.getElementById('epButtonWrapper');
+    const signaturesContainer = document.getElementById('signaturesContainer');
+
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+            signaturesContainer.classList.remove('signature-hidden');
+            signaturesContainer.classList.add('signature-visible');
+            epButtonWrapper.classList.add('ep-button-wrapper--hidden');
+        });
+    }
+
+    // Получение параметров из URL
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    function setElementValue(elementId, value, defaultValue) {
+        const element = document.getElementById(elementId);
+        if (element && value !== null && value !== undefined && value !== '') {
+            element.innerText = decodeURIComponent(value);
+        } else if (element && defaultValue) {
+            element.innerText = defaultValue;
+        }
+    }
+
+    const urlPatient = getUrlParameter('patient');
+    const urlDate = getUrlParameter('date');
+    const urlDoctor = getUrlParameter('doctor');
+    
+    setElementValue('patientName', urlPatient, 'Ксения Викторовна П.');
+    setElementValue('issueDate', urlDate, '2026-03-02');
+    setElementValue('doctorName', urlDoctor, 'Цицава Людмила');
+    setElementValue('doctorCert', getUrlParameter('doctorCert'), '1832820349536861278881725538315849685825');
+    setElementValue('doctorValid', getUrlParameter('doctorValid'), 'с 11.12.2025 по 11.03.2027');
+    setElementValue('orgCert', getUrlParameter('orgCert'), '96403703493897758531285374117963780380');
+    setElementValue('orgValid', getUrlParameter('orgValid'), 'с 17.11.2025 по 10.02.2027');
+    setElementValue('orgFullName', getUrlParameter('orgName'), 'ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ УЧРЕЖДЕНИЕ ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ "ГОРОДСКАЯ ПОЛИКЛИНИКА № 8 ДЕПАРТАМЕНТА ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ"');
+    setElementValue('address', getUrlParameter('address'), 'г. Москва, Мичуринский проспект, Олимпийская деревня, дом 16, корп. 1');
+    setElementValue('ogrn', getUrlParameter('ogrn'), '1037739410928');
+    setElementValue('orgName', getUrlParameter('medicalOrg'), 'ГП 8 Ф 2 (ГП 124)');
+</script>
+
+</body>
+</html>
