@@ -68,7 +68,6 @@
             margin-top: 16px;
         }
 
-        /* Панель редактирования */
         .edit-panel {
             background: #f0f0f0;
             padding: 16px;
@@ -150,7 +149,6 @@
             margin-top: 8px;
         }
 
-        /* Кнопка Сведения об ЭП */
         .ep-button-wrapper {
             margin-top: 24px;
             border-top: 1px solid #E7E8E9;
@@ -299,7 +297,6 @@
             }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -310,7 +307,6 @@
 
     <div class="main">
         <div class="content">
-            <!-- Панель редактирования данных -->
             <div class="edit-panel">
                 <h3>⚙️ Редактировать данные справки</h3>
                 <div class="form-row">
@@ -336,7 +332,6 @@
                 </div>
             </div>
 
-            <!-- Данные справки -->
             <div class="document-html">
                 <div class="xslt_11859s">
                     <div class="xslt_section">
@@ -358,7 +353,6 @@
                 </div>
             </div>
 
-            <!-- Кнопка Сведения об ЭП -->
             <div class="ep-button-wrapper" id="epButtonWrapper">
                 <button class="ep-button" id="toggleEpButton">
                     <span class="ep-button__icon"></span>
@@ -366,7 +360,6 @@
                 </button>
             </div>
 
-            <!-- Скрываемый блок с сертификатами -->
             <div id="signaturesContainer" class="signature-hidden">
                 <div class="signature-block">
                     <div class="signature-html">
@@ -429,7 +422,34 @@
 </div>
 
 <script>
-    // Кнопка "Сведения об ЭП" (пропадает после нажатия)
+    // Функция для генерации QR-кода (встроенная, без внешних библиотек)
+    function generateQR(text, canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        
+        // Очищаем canvas
+        canvas.innerHTML = '';
+        
+        // Создаём новый canvas элемент
+        const qrCanvas = document.createElement('canvas');
+        qrCanvas.width = 150;
+        qrCanvas.height = 150;
+        canvas.appendChild(qrCanvas);
+        
+        // Используем API Google Charts для генерации QR (простой и надёжный)
+        const img = document.createElement('img');
+        img.src = `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(text)}&choe=UTF-8`;
+        img.width = 150;
+        img.height = 150;
+        img.style.border = '1px solid #ddd';
+        img.style.padding = '8px';
+        img.style.backgroundColor = 'white';
+        
+        canvas.innerHTML = '';
+        canvas.appendChild(img);
+    }
+
+    // Кнопка "Сведения об ЭП"
     const toggleButton = document.getElementById('toggleEpButton');
     const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
@@ -467,7 +487,6 @@
         }
     }
 
-    // Кнопка "Применить"
     if (applyBtn) {
         applyBtn.addEventListener('click', function() {
             const patient = editPatient.value;
@@ -478,7 +497,6 @@
         });
     }
 
-    // Кнопка "Показать QR-код"
     if (showQrBtn) {
         showQrBtn.addEventListener('click', function() {
             const currentPatient = document.getElementById('patientName').innerText;
@@ -511,17 +529,9 @@
             const qrUrl = baseUrl + '?' + params.toString();
             if (qrLinkSpan) qrLinkSpan.innerText = qrUrl;
             
+            // Генерируем QR
             if (qrCanvas) {
-                qrCanvas.innerHTML = '';
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(qrCanvas, {
-                        text: qrUrl,
-                        width: 150,
-                        height: 150
-                    });
-                } else {
-                    qrCanvas.innerHTML = '<p style="color: red;">Ошибка: библиотека QR не загружена. Попробуйте обновить страницу (Ctrl+F5).</p>';
-                }
+                generateQR(qrUrl, 'qrCanvas');
             }
             
             if (qrContainer) qrContainer.style.display = 'block';
