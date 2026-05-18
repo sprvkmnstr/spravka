@@ -299,6 +299,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -427,20 +428,21 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
-    // ========== Кнопка "Сведения об ЭП" (пропадает после нажатия) ==========
+    // Кнопка "Сведения об ЭП" (пропадает после нажатия)
     const toggleButton = document.getElementById('toggleEpButton');
     const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
 
-    toggleButton.addEventListener('click', function() {
-        signaturesContainer.classList.remove('signature-hidden');
-        signaturesContainer.classList.add('signature-visible');
-        epButtonWrapper.classList.add('ep-button-wrapper--hidden');
-    });
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+            signaturesContainer.classList.remove('signature-hidden');
+            signaturesContainer.classList.add('signature-visible');
+            epButtonWrapper.classList.add('ep-button-wrapper--hidden');
+        });
+    }
 
-    // ========== Панель редактирования ==========
+    // Панель редактирования
     const editPatient = document.getElementById('editPatient');
     const editDate = document.getElementById('editDate');
     const editDoctor = document.getElementById('editDoctor');
@@ -449,80 +451,84 @@
     const qrContainer = document.getElementById('qrContainer');
     const qrCanvas = document.getElementById('qrCanvas');
     const qrLinkSpan = document.getElementById('qrLink');
-    let currentQr = null;
 
-    // Функция обновления страницы
     function updatePageData(patient, date, doctor) {
         if (patient !== undefined && patient !== '') {
-            document.getElementById('patientName').innerText = patient;
+            const patientElem = document.getElementById('patientName');
+            if (patientElem) patientElem.innerText = patient;
         }
         if (date !== undefined && date !== '') {
-            document.getElementById('issueDate').innerText = date;
+            const dateElem = document.getElementById('issueDate');
+            if (dateElem) dateElem.innerText = date;
         }
         if (doctor !== undefined && doctor !== '') {
-            document.getElementById('doctorName').innerText = doctor;
+            const doctorElem = document.getElementById('doctorName');
+            if (doctorElem) doctorElem.innerText = doctor;
         }
     }
 
     // Кнопка "Применить"
-    applyBtn.addEventListener('click', function() {
-        const patient = editPatient.value;
-        const date = editDate.value;
-        const doctor = editDoctor.value;
-        
-        updatePageData(patient, date, doctor);
-        
-        // Скрываем QR-контейнер при изменении данных
-        qrContainer.style.display = 'none';
-    });
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function() {
+            const patient = editPatient.value;
+            const date = editDate.value;
+            const doctor = editDoctor.value;
+            updatePageData(patient, date, doctor);
+            if (qrContainer) qrContainer.style.display = 'none';
+        });
+    }
 
     // Кнопка "Показать QR-код"
-    showQrBtn.addEventListener('click', function() {
-        const currentPatient = document.getElementById('patientName').innerText;
-        const currentDate = document.getElementById('issueDate').innerText;
-        const currentDoctor = document.getElementById('doctorName').innerText;
-        const currentDoctorCert = document.getElementById('doctorCert').innerText;
-        const currentDoctorValid = document.getElementById('doctorValid').innerText;
-        const currentOrgCert = document.getElementById('orgCert').innerText;
-        const currentOrgValid = document.getElementById('orgValid').innerText;
-        const currentOrgName = document.getElementById('orgName').innerText;
-        const currentOrgFullName = document.getElementById('orgFullName').innerText;
-        const currentAddress = document.getElementById('address').innerText;
-        const currentOgrn = document.getElementById('ogrn').innerText;
-        
-        // Формируем ссылку с параметрами
-        const baseUrl = window.location.origin + window.location.pathname;
-        const params = new URLSearchParams({
-            patient: currentPatient,
-            date: currentDate,
-            doctor: currentDoctor,
-            doctorCert: currentDoctorCert,
-            doctorValid: currentDoctorValid,
-            orgCert: currentOrgCert,
-            orgValid: currentOrgValid,
-            medicalOrg: currentOrgName,
-            orgName: currentOrgFullName,
-            address: currentAddress,
-            ogrn: currentOgrn
+    if (showQrBtn) {
+        showQrBtn.addEventListener('click', function() {
+            const currentPatient = document.getElementById('patientName').innerText;
+            const currentDate = document.getElementById('issueDate').innerText;
+            const currentDoctor = document.getElementById('doctorName').innerText;
+            const currentDoctorCert = document.getElementById('doctorCert').innerText;
+            const currentDoctorValid = document.getElementById('doctorValid').innerText;
+            const currentOrgCert = document.getElementById('orgCert').innerText;
+            const currentOrgValid = document.getElementById('orgValid').innerText;
+            const currentOrgName = document.getElementById('orgName').innerText;
+            const currentOrgFullName = document.getElementById('orgFullName').innerText;
+            const currentAddress = document.getElementById('address').innerText;
+            const currentOgrn = document.getElementById('ogrn').innerText;
+            
+            const baseUrl = window.location.origin + window.location.pathname;
+            const params = new URLSearchParams({
+                patient: currentPatient,
+                date: currentDate,
+                doctor: currentDoctor,
+                doctorCert: currentDoctorCert,
+                doctorValid: currentDoctorValid,
+                orgCert: currentOrgCert,
+                orgValid: currentOrgValid,
+                medicalOrg: currentOrgName,
+                orgName: currentOrgFullName,
+                address: currentAddress,
+                ogrn: currentOgrn
+            });
+            
+            const qrUrl = baseUrl + '?' + params.toString();
+            if (qrLinkSpan) qrLinkSpan.innerText = qrUrl;
+            
+            if (qrCanvas) {
+                qrCanvas.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrCanvas, {
+                        text: qrUrl,
+                        width: 150,
+                        height: 150
+                    });
+                } else {
+                    qrCanvas.innerHTML = '<p style="color: red;">Ошибка: библиотека QR не загружена. Попробуйте обновить страницу (Ctrl+F5).</p>';
+                }
+            }
+            
+            if (qrContainer) qrContainer.style.display = 'block';
         });
-        
-        const qrUrl = baseUrl + '?' + params.toString();
-        qrLinkSpan.innerText = qrUrl;
-        
-        // Очищаем старый QR
-        qrCanvas.innerHTML = '';
-        
-        // Создаём новый QR
-        currentQr = new QRCode(qrCanvas, {
-            text: qrUrl,
-            width: 150,
-            height: 150
-        });
-        
-        qrContainer.style.display = 'block';
-    });
+    }
 
-    // ========== Получение параметров из URL ==========
+    // Получение параметров из URL
     function getUrlParameter(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
@@ -537,7 +543,6 @@
         }
     }
 
-    // Применяем параметры из URL (если есть)
     const urlPatient = getUrlParameter('patient');
     const urlDate = getUrlParameter('date');
     const urlDoctor = getUrlParameter('doctor');
