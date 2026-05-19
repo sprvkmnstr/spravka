@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор QR-кода — настройки в реальном времени</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #1a1a2e;
+            margin: 0;
+            padding: 20px;
+            color: #eee;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .settings {
+            flex: 1;
+            min-width: 280px;
+            background: #16213e;
+            padding: 20px;
+            border-radius: 16px;
+        }
+        .preview {
+            flex: 1;
+            min-width: 400px;
+            background: #16213e;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .preview img {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            max-width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        h2 { margin-top: 0; color: #0f0; font-size: 18px; }
+        hr { margin: 16px 0; border-color: #2a3a5a; }
+        .slider-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        input[type="number"] {
+            width: 80px;
+            background: #0f3460;
+            border: 1px solid #2a4a7a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            margin-left: 10px;
+        }
+        .param-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        button {
+            background: #0a5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 16px;
+            width: 100%;
+        }
+        button:hover { background: #085; }
+        .download-btn { background: #06f; margin-top: 8px; }
+        .download-btn:hover { background: #0050cc; }
+        .value-display {
+            font-family: monospace;
+            font-size: 12px;
+            background: #0f3460;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .note {
+            font-size: 12px;
+            color: #888;
+            margin-top: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="settings">
+        <h2>⚙️ Настройки QR-кода</h2>
+        
+        <div class="slider-group">
+            <label>📐 Версия QR (чем меньше — тем крупнее клетки)</label>
+            <div class="param-row">
+                <input type="range" id="versionSlider" min="1" max="10" value="3" step="1">
+                <span class="value-display" id="versionValue">Version 3</span>
+            </div>
+        </div>
+        
+        <div class="slider-group">
+            <label>📏 Размер QR (пикселей)</label>
+            <div class="param-row">
+                <input type="range" id="sizeSlider" min="300" max="800" value="500" step="10">
+                <span class="value-display" id="sizeValue">500 px</span>
+            </div>
+        </div>
+        
+        <div class="slider-group">
+            <label>🎨 Белая рамка — ширина</label>
+            <div class="param-row">
+                <input type="range" id="rectWSlider" min="60" max="180" value="130" step="2">
+                <span class="value-display" id="rectWValue">130 px</span>
+            </div>
+        </div>
+        
+        <div class="slider-group">
+            <label>🎨 Белая рамка — высота</label>
+            <div class="param-row">
+                <input type="range" id="rectHSlider" min="60" max="180" value="130" step="2">
+                <span class="value-display" id="rectHValue">130 px</span>
+            </div>
+        </div>
+        
+        <div class="slider-group">
+            <label>🖼️ Размер логотипа (%) от рамки</label>
+            <div class="param-row">
+                <input type="range" id="logoSizeSlider" min="50" max="95" value="85" step="1">
+                <span class="value-display" id="logoSizeValue">85%</span>
+            </div>
+        </div>
+        
+        <div class="slider-group">
+            <label>🔄 Скругление углов рамки</label>
+            <div class="param-row">
+                <input type="range" id="radiusSlider" min="5" max="40" value="18" step="1">
+                <span class="value-display" id="radiusValue">18 px</span>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="slider-group">
+            <label>📝 Текст ссылки (меняется в реальном времени)</label>
+            <input type="text" id="testLink" placeholder="https://..." style="width:100%; padding:8px; border-radius:8px; background:#0f3460; border:1px solid #2a4a7a; color:white;">
+        </div>
+        
+        <button id="refreshBtn">🔄 Обновить QR-код</button>
+        <button id="downloadBtn" class="download-btn">💾 Скачать QR-код (PNG)</button>
+        
+        <div class="note">
+            💡 Совет: версия 1 (21×21) — самые крупные клетки<br>
+            💡 Для прямоугольного логотипа сделайте ширину рамки больше высоты
+        </div>
+    </div>
+    
+    <div class="preview">
+        <h2>👁️ Предпросмотр QR-кода</h2>
+        <div id="qrPreview">
+            <div style="padding: 40px; color: #888;">Настройте параметры и нажмите «Обновить»</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentQrDataUrl = null;
+    
+    // Функция генерации QR
+    async function generateQR() {
+        const previewDiv = document.getElementById('qrPreview');
+        previewDiv.innerHTML = '<div style="padding: 40px;">⏳ Генерация...</div>';
+        
+        // Получаем настройки
+        const version = document.getElementById('versionSlider').value;
+        const size = parseInt(document.getElementById('sizeSlider').value);
+        const rectWidth = parseInt(document.getElementById('rectWSlider').value);
+        const rectHeight = parseInt(document.getElementById('rectHSlider').value);
+        const logoPercent = parseInt(document.getElementById('logoSizeSlider').value) / 100;
+        const radius = parseInt(document.getElementById('radiusSlider').value);
+        
+        let testText = document.getElementById('testLink').value;
+        if (!testText) {
+            testText = 'https://sprvkmnstr.github.io/spravka/view.html?patient=Тест&date=2026-05-19&doctor=Тестов';
+        }
+        
+        // Загружаем логотип
+        let logoImg = null;
+        try {
+            logoImg = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = () => reject();
+                img.src = 'logo.png';
+                setTimeout(() => reject(), 2000);
+            });
+        } catch(e) {
+            console.log('Логотип не загружен');
+        }
+        
+        // Генерируем QR через API
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(testText)}&ecc=L&version=${version}`;
+        
+        let qrImage = null;
+        try {
+            qrImage = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = () => reject();
+                img.src = apiUrl;
+                setTimeout(() => reject(), 5000);
+            });
+        } catch(e) {
+            previewDiv.innerHTML = '<div style="padding: 40px; color:red;">❌ Ошибка генерации QR. Проверьте интернет.</div>';
+            return null;
+        }
+        
+        // Создаём canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.drawImage(qrImage, 0, 0, size, size);
+        
+        // Рисуем белую рамку
+        const rectX = (size - rectWidth) / 2;
+        const rectY = (size - rectHeight) / 2;
+        
+        ctx.beginPath();
+        ctx.moveTo(rectX + radius, rectY);
+        ctx.lineTo(rectX + rectWidth - radius, rectY);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + radius);
+        ctx.lineTo(rectX + rectWidth, rectY + rectHeight - radius);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - radius, rectY + rectHeight);
+        ctx.lineTo(rectX + radius, rectY + rectHeight);
+        ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - radius);
+        ctx.lineTo(rectX, rectY + radius);
+        ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
+        ctx.closePath();
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#aaaaaa';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        
+        // Рисуем логотип
+        if (logoImg) {
+            const logoWidth = rectWidth * logoPercent;
+            const logoHeight = rectHeight * logoPercent;
+            const logoX = rectX + (rectWidth - logoWidth) / 2;
+            const logoY = rectY + (rectHeight - logoHeight) / 2;
+            ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight);
+        } else {
+            // Запасной вариант — сердечко
+            ctx.font = `${Math.min(rectWidth, rectHeight) * 0.4}px "Segoe UI Emoji", "Apple Color Emoji"`;
+            ctx.fillStyle = '#E31E24';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('❤️', size/2, size/2);
+        }
+        
+        // Показываем результат
+        const resultImg = document.createElement('img');
+        resultImg.src = canvas.toDataURL('image/png');
+        resultImg.style.width = 'min(100%, 400px)';
+        resultImg.style.border = '1px solid #333';
+        resultImg.style.borderRadius = '12px';
+        resultImg.style.background = 'white';
+        
+        previewDiv.innerHTML = '';
+        previewDiv.appendChild(resultImg);
+        
+        return canvas.toDataURL('image/png');
+    }
+    
+    // Обновление значений на экране
+    function updateDisplays() {
+        document.getElementById('versionValue').innerText = `Version ${document.getElementById('versionSlider').value}`;
+        document.getElementById('sizeValue').innerText = `${document.getElementById('sizeSlider').value} px`;
+        document.getElementById('rectWValue').innerText = `${document.getElementById('rectWSlider').value} px`;
+        document.getElementById('rectHValue').innerText = `${document.getElementById('rectHSlider').value} px`;
+        document.getElementById('logoSizeValue').innerText = `${document.getElementById('logoSizeSlider').value}%`;
+        document.getElementById('radiusValue').innerText = `${document.getElementById('radiusSlider').value} px`;
+    }
+    
+    // Обновление всех параметров и генерация
+    async function refreshQR() {
+        updateDisplays();
+        currentQrDataUrl = await generateQR();
+    }
+    
+    // Скачивание
+    function downloadQR() {
+        if (currentQrDataUrl) {
+            const link = document.createElement('a');
+            link.download = `qr_custom.png`;
+            link.href = currentQrDataUrl;
+            link.click();
+        } else {
+            alert('Сначала сгенерируйте QR-код!');
+        }
+    }
+    
+    // Привязываем обработчики
+    document.getElementById('refreshBtn').addEventListener('click', refreshQR);
+    document.getElementById('downloadBtn').addEventListener('click', downloadQR);
+    
+    // При изменении любого слайдера — обновляем
+    const sliders = ['versionSlider', 'sizeSlider', 'rectWSlider', 'rectHSlider', 'logoSizeSlider', 'radiusSlider'];
+    sliders.forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            updateDisplays();
+        });
+    });
+    
+    // Первая генерация
+    refreshQR();
+</script>
+</body>
+</html>
