@@ -145,9 +145,6 @@
         .qr-image {
             margin: 10px auto;
             display: inline-block;
-            border: 1px solid #ddd;
-            padding: 10px;
-            background: white;
         }
 
         .qr-link {
@@ -305,7 +302,6 @@
             }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -432,82 +428,79 @@
 </div>
 
 <script>
-    // Функция создания QR с сердечком в центре (как на оригинальной справке)
-    function generateQRWithHeart(text, containerId) {
-        return new Promise((resolve) => {
-            const container = document.getElementById(containerId);
-            if (!container) {
-                resolve(null);
-                return;
-            }
-            container.innerHTML = '';
+    // Функция создания QR с сердечком через API (всегда работает)
+    async function generateQRWithHeart(text, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return null;
+        
+        container.innerHTML = '<div style="text-align:center;">⏳ Генерация QR-кода...</div>';
+        
+        try {
+            // Создаём QR через API quickchart.io
+            const qrApiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=300&margin=2`;
             
-            // Создаём canvas
+            // Загружаем изображение QR
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            
+            const qrImageLoaded = new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = qrApiUrl;
+            });
+            
+            await qrImageLoaded;
+            
+            // Создаём canvas для финального изображения
             const canvas = document.createElement('canvas');
-            canvas.width = 400;
-            canvas.height = 400;
+            canvas.width = 300;
+            canvas.height = 300;
             const ctx = canvas.getContext('2d');
             
-            // Временный div для QR
-            const tempDiv = document.createElement('div');
-            try {
-                new QRCode(tempDiv, {
-                    text: text,
-                    width: 400,
-                    height: 400,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            } catch(e) {
-                console.error('QR generation error:', e);
-                container.innerHTML = '<p style="color:red;">Ошибка генерации QR. Обновите страницу.</p>';
-                resolve(null);
-                return;
-            }
+            // Рисуем QR
+            ctx.drawImage(img, 0, 0, 300, 300);
             
-            setTimeout(() => {
-                const qrCanvas = tempDiv.querySelector('canvas');
-                if (qrCanvas) {
-                    ctx.drawImage(qrCanvas, 0, 0, 400, 400);
-                    
-                    // Белый круг в центре
-                    const centerX = 200;
-                    const centerY = 200;
-                    const radius = 40;
-                    
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fill();
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    
-                    // Красное сердечко (логотип Московская медицина)
-                    ctx.font = '32px "Segoe UI Emoji", "Apple Color Emoji", Arial';
-                    ctx.fillStyle = '#E31E24';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('❤️', centerX, centerY);
-                    
-                    // Вставляем изображение
-                    const img = document.createElement('img');
-                    img.src = canvas.toDataURL('image/png');
-                    img.style.width = '150px';
-                    img.style.height = '150px';
-                    img.style.display = 'block';
-                    img.style.margin = '0 auto';
-                    container.innerHTML = '';
-                    container.appendChild(img);
-                    
-                    resolve(canvas.toDataURL('image/png'));
-                } else {
-                    container.innerHTML = '<p style="color:red;">Ошибка генерации QR. Попробуйте обновить страницу.</p>';
-                    resolve(null);
-                }
-            }, 150);
-        });
+            // Рисуем белый круг в центре
+            const centerX = 150;
+            const centerY = 150;
+            const radius = 35;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = '#dddddd';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Рисуем красное сердечко
+            ctx.font = '30px "Segoe UI Emoji", "Apple Color Emoji", Arial';
+            ctx.fillStyle = '#E31E24';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('❤️', centerX, centerY);
+            
+            // Вставляем в контейнер
+            const resultImg = document.createElement('img');
+            resultImg.src = canvas.toDataURL('image/png');
+            resultImg.style.width = '180px';
+            resultImg.style.height = '180px';
+            resultImg.style.display = 'block';
+            resultImg.style.margin = '0 auto';
+            resultImg.style.border = '1px solid #ddd';
+            resultImg.style.padding = '8px';
+            resultImg.style.background = 'white';
+            
+            container.innerHTML = '';
+            container.appendChild(resultImg);
+            
+            return canvas.toDataURL('image/png');
+            
+        } catch (error) {
+            console.error('QR generation error:', error);
+            container.innerHTML = '<p style="color:red;">❌ Ошибка генерации QR. Проверьте подключение к интернету и обновите страницу.</p>';
+            return null;
+        }
     }
 
     // Кнопка "Сведения об ЭП"
@@ -594,7 +587,7 @@
             const qrUrl = baseUrl + '?' + params.toString();
             if (qrLinkSpan) qrLinkSpan.innerText = qrUrl;
             
-            // Генерируем QR с сердечком
+            // Генерируем QR с сердечком через API
             currentQrDataUrl = await generateQRWithHeart(qrUrl, 'qrImageContainer');
             
             if (qrContainer) qrContainer.style.display = 'block';
