@@ -5,205 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Проверка документа по QR-коду</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto', Arial, sans-serif;
-            font-weight: 400;
-            background: #f5f6f7;
-        }
-
-        .layout {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .header {
-            padding: 30px 0;
-            max-width: 1180px;
-            width: 90%;
-            margin: 0 auto;
-        }
-
-        .main {
-            flex: 1 1 auto;
-            padding: 24px;
-            background: #f5f6f7;
-        }
-
-        .content {
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-            padding: 24px;
-            border-radius: 15px;
-            max-width: 1180px;
-            margin: 0 auto;
-        }
-
-        .document-html, .signature-html {
-            width: 100%;
-        }
-
-        .xslt_11859s {
-            font-family: 'Open Sans', Roboto, Arial, sans-serif;
-            line-height: 24px;
-            font-size: 16px;
-            color: #12171F;
-        }
-
-        .xslt_text_bold {
-            font-weight: bold;
-        }
-
-        .xslt_section:not(:first-child) {
-            margin-top: 16px;
-        }
-
-        .ep-button-wrapper {
-            margin-top: 24px;
-            border-top: 1px solid #E7E8E9;
-            padding-top: 16px;
-        }
-
-        .ep-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0;
-            border: 0;
-            background: transparent;
-            color: #06f;
-            font-family: 'Roboto', Arial, sans-serif;
-            font-size: 16px;
-            line-height: 24px;
-            cursor: pointer;
-        }
-
-        .ep-button__icon {
-            width: 20px;
-            height: 20px;
-            position: relative;
-            display: inline-block;
-        }
-
-        .ep-button__icon:before {
-            content: "";
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 8px;
-            height: 8px;
-            border-right: 2px solid #06f;
-            border-bottom: 2px solid #06f;
-            transform: translate(-50%, -65%) rotate(45deg);
-        }
-
-        .signature-hidden {
-            display: none;
-        }
-
-        .signature-visible {
-            display: block;
-        }
-
-        .ep-button-wrapper--hidden {
-            display: none;
-        }
-
-        .signature-block {
-            width: 100%;
-            margin-top: 16px;
-        }
-
-        .xslt_signature {
-            margin-top: 16px;
-            border-top: 1px solid #E7E8E9;
-        }
-
-        .signature-title {
-            font-weight: bold;
-            font-size: 18px;
-            margin-top: 16px;
-        }
-
-        .signature-field {
-            margin-top: 16px;
-        }
-
-        .signature-field-label {
-            font-weight: bold;
-        }
-
-        .signature-field-value {
-            margin-top: 4px;
-            word-break: break-word;
-        }
-
-        .desktop-footer {
-            display: flex;
-            align-items: center;
-            padding: 76px 0;
-            max-width: 1180px;
-            width: 90%;
-            margin: 0 auto;
-            justify-content: space-between;
-        }
-
-        .desktop-footer-icons {
-            display: flex;
-            align-items: center;
-        }
-
-        .desktop-footer-text {
-            color: #696969;
-            white-space: pre-line;
-            margin: 0 15px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .desktop-footer-icon {
-            max-height: 64px;
-        }
-
-        .ml-32 {
-            margin-left: 32px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; padding: 0; font-family: 'Roboto', Arial, sans-serif; font-weight: 400; background: #f5f6f7; }
+        .layout { display: flex; flex-direction: column; height: 100%; }
+        .header { padding: 30px 0; max-width: 1180px; width: 90%; margin: 0 auto; }
+        .main { flex: 1 1 auto; padding: 24px; background: #f5f6f7; }
+        .content { display: flex; flex-direction: column; background: #fff; padding: 24px; border-radius: 15px; max-width: 1180px; margin: 0 auto; }
+        .document-html, .signature-html { width: 100%; }
+        .xslt_11859s { font-family: 'Open Sans', Roboto, Arial, sans-serif; line-height: 24px; font-size: 16px; color: #12171F; }
+        .xslt_text_bold { font-weight: bold; }
+        .xslt_section:not(:first-child) { margin-top: 16px; }
+        .ep-button-wrapper { margin-top: 24px; border-top: 1px solid #E7E8E9; padding-top: 16px; }
+        .ep-button { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: #06f; font-family: 'Roboto', Arial, sans-serif; font-size: 16px; line-height: 24px; cursor: pointer; }
+        .ep-button__icon { width: 20px; height: 20px; position: relative; display: inline-block; }
+        .ep-button__icon:before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; border-right: 2px solid #06f; border-bottom: 2px solid #06f; transform: translate(-50%, -65%) rotate(45deg); }
+        .signature-hidden { display: none; }
+        .signature-visible { display: block; }
+        .ep-button-wrapper--hidden { display: none; }
+        .signature-block { width: 100%; margin-top: 16px; }
+        .xslt_signature { margin-top: 16px; border-top: 1px solid #E7E8E9; }
+        .signature-title { font-weight: bold; font-size: 18px; margin-top: 16px; }
+        .signature-field { margin-top: 16px; }
+        .signature-field-label { font-weight: bold; }
+        .signature-field-value { margin-top: 4px; word-break: break-word; }
+        .desktop-footer { display: flex; align-items: center; padding: 76px 0; max-width: 1180px; width: 90%; margin: 0 auto; justify-content: space-between; }
+        .desktop-footer-icons { display: flex; align-items: center; }
+        .desktop-footer-text { color: #696969; white-space: pre-line; margin: 0 15px; font-size: 14px; line-height: 1.4; }
+        .desktop-footer-icon { max-height: 64px; }
+        .ml-32 { margin-left: 32px; }
         @media (max-width: 768px) {
-            .header {
-                padding: 20px 16px;
-                width: 100%;
-            }
-            .main {
-                padding: 24px 16px;
-            }
-            .content {
-                padding: 20px;
-            }
-            .desktop-footer {
-                flex-direction: column;
-                padding: 40px 16px;
-                gap: 24px;
-                text-align: center;
-            }
-            .desktop-footer-icons {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 16px;
-            }
-            .ml-32 {
-                margin-left: 0;
-            }
+            .header { padding: 20px 16px; width: 100%; }
+            .main { padding: 24px 16px; }
+            .content { padding: 20px; }
+            .desktop-footer { flex-direction: column; padding: 40px 16px; gap: 24px; text-align: center; }
+            .desktop-footer-icons { flex-wrap: wrap; justify-content: center; gap: 16px; }
+            .ml-32 { margin-left: 0; }
         }
     </style>
 </head>
@@ -310,7 +146,6 @@
     const toggleButton = document.getElementById('toggleEpButton');
     const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
-
     if (toggleButton) {
         toggleButton.addEventListener('click', function() {
             signaturesContainer.classList.remove('signature-hidden');
@@ -319,18 +154,15 @@
         });
     }
 
-    // Получение параметров из URL
     function getUrlParameter(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
+        return new URLSearchParams(window.location.search).get(name);
     }
-
-    function setElementValue(elementId, value, defaultValue) {
-        const element = document.getElementById(elementId);
-        if (element && value !== null && value !== undefined && value !== '') {
-            element.innerText = decodeURIComponent(value);
-        } else if (element && defaultValue) {
-            element.innerText = defaultValue;
+    function setElementValue(id, val, def) {
+        const el = document.getElementById(id);
+        if (el && val !== null && val !== undefined && val !== '') {
+            el.innerText = decodeURIComponent(val);
+        } else if (el && def) {
+            el.innerText = def;
         }
     }
 
