@@ -185,7 +185,7 @@
 </div>
 
 <script>
-    // Генерация QR с Version 1 (21×21) — самый крупный + логотип на закруглённом белом фоне
+    // Генерация QR с Version 1 (21×21) + прямоугольная рамка под логотип
     async function generateQRWithLogo(text, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return null;
@@ -234,20 +234,21 @@
         
         ctx.drawImage(qrImage, 0, 0, size, size);
         
-        // Белый прямоугольник с закруглёнными углами (как на оригинале)
-        const rectSize = 130;
-        const rectX = (size - rectSize) / 2;
-        const rectY = (size - rectSize) / 2;
-        const radius = 20;
+        // ПРЯМОУГОЛЬНАЯ белая рамка (ширина 140, высота 100)
+        const rectWidth = 140;
+        const rectHeight = 100;
+        const rectX = (size - rectWidth) / 2;
+        const rectY = (size - rectHeight) / 2;
+        const radius = 16;
         
         ctx.beginPath();
         ctx.moveTo(rectX + radius, rectY);
-        ctx.lineTo(rectX + rectSize - radius, rectY);
-        ctx.quadraticCurveTo(rectX + rectSize, rectY, rectX + rectSize, rectY + radius);
-        ctx.lineTo(rectX + rectSize, rectY + rectSize - radius);
-        ctx.quadraticCurveTo(rectX + rectSize, rectY + rectSize, rectX + rectSize - radius, rectY + rectSize);
-        ctx.lineTo(rectX + radius, rectY + rectSize);
-        ctx.quadraticCurveTo(rectX, rectY + rectSize, rectX, rectY + rectSize - radius);
+        ctx.lineTo(rectX + rectWidth - radius, rectY);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + radius);
+        ctx.lineTo(rectX + rectWidth, rectY + rectHeight - radius);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - radius, rectY + rectHeight);
+        ctx.lineTo(rectX + radius, rectY + rectHeight);
+        ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - radius);
         ctx.lineTo(rectX, rectY + radius);
         ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
         ctx.closePath();
@@ -255,16 +256,17 @@
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.strokeStyle = '#dddddd';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
         
-        // Логотип (крупный, почти во всю белую область)
+        // Логотип — СПЛЮЩЕННЫЙ (прямоугольный, вписывается в рамку)
         if (logoImg) {
-            const logoSize = rectSize - 20;
-            ctx.drawImage(logoImg, rectX + 10, rectY + 10, logoSize, logoSize);
+            const logoWidth = rectWidth - 20;   // 120
+            const logoHeight = rectHeight - 16;  // 84
+            ctx.drawImage(logoImg, rectX + 10, rectY + 8, logoWidth, logoHeight);
         } else {
             // Если логотипа нет — рисуем сердечко
-            ctx.font = '60px "Segoe UI Emoji", "Apple Color Emoji"';
+            ctx.font = '50px "Segoe UI Emoji", "Apple Color Emoji"';
             ctx.fillStyle = '#E31E24';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
