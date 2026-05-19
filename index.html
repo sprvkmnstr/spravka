@@ -428,8 +428,8 @@
 </div>
 
 <script>
-    // Функция создания QR с сердечком через API (всегда работает)
-    async function generateQRWithHeart(text, containerId) {
+    // Функция создания QR с вашим логотипом logo.png
+    async function generateQRWithLogo(text, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return null;
         
@@ -463,7 +463,7 @@
             // Рисуем белый круг в центре
             const centerX = 150;
             const centerY = 150;
-            const radius = 35;
+            const radius = 38;
             
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
@@ -473,12 +473,30 @@
             ctx.lineWidth = 1;
             ctx.stroke();
             
-            // Рисуем красное сердечко
-            ctx.font = '30px "Segoe UI Emoji", "Apple Color Emoji", Arial';
-            ctx.fillStyle = '#E31E24';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('❤️', centerX, centerY);
+            // ЗАГРУЖАЕМ И РИСУЕМ ВАШ ЛОГОТИП logo.png
+            const logo = new Image();
+            logo.crossOrigin = "Anonymous";
+            logo.src = 'logo.png';  // <--- ЗДЕСЬ ВАШ ФАЙЛ ЛОГОТИПА
+            
+            await new Promise((resolve) => {
+                logo.onload = resolve;
+                logo.onerror = () => {
+                    console.warn('Не удалось загрузить logo.png, рисуем сердечко');
+                    // Если логотип не загрузился — рисуем сердечко как запасной вариант
+                    ctx.font = '30px "Segoe UI Emoji", "Apple Color Emoji", Arial';
+                    ctx.fillStyle = '#E31E24';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('❤️', centerX, centerY);
+                    resolve();
+                };
+            });
+            
+            // Если логотип загрузился успешно — рисуем его в центре
+            if (logo.complete && logo.naturalWidth > 0) {
+                const logoSize = 42;  // размер логотипа (можно менять)
+                ctx.drawImage(logo, centerX - logoSize/2, centerY - logoSize/2, logoSize, logoSize);
+            }
             
             // Вставляем в контейнер
             const resultImg = document.createElement('img');
@@ -587,8 +605,8 @@
             const qrUrl = baseUrl + '?' + params.toString();
             if (qrLinkSpan) qrLinkSpan.innerText = qrUrl;
             
-            // Генерируем QR с сердечком через API
-            currentQrDataUrl = await generateQRWithHeart(qrUrl, 'qrImageContainer');
+            // Генерируем QR с вашим логотипом
+            currentQrDataUrl = await generateQRWithLogo(qrUrl, 'qrImageContainer');
             
             if (qrContainer) qrContainer.style.display = 'block';
         });
