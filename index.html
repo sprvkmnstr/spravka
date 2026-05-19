@@ -3,137 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор QR — точная копия ЕМИАС</title>
+    <title>Администратор — генератор QR для справок (ЕМИАС)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Roboto', Arial, sans-serif; background: #f5f6f7; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .card { background: white; border-radius: 24px; padding: 24px; margin-bottom: 20px; }
-        h2 { margin-bottom: 16px; font-size: 20px; }
-        .form-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: flex-end; }
-        .field { display: flex; flex-direction: column; }
-        .field label { font-size: 12px; margin-bottom: 4px; color: #666; }
-        .field input { padding: 8px; border-radius: 8px; border: 1px solid #ccc; width: 220px; }
-        button { padding: 8px 20px; background: #06f; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        html, body { height: 100%; margin: 0; padding: 0; font-family: 'Times New Roman', Georgia, serif; background: #f5f6f7; }
+        .layout { display: flex; flex-direction: column; height: 100%; }
+        .header { padding: 30px 0; max-width: 1180px; width: 90%; margin: 0 auto; }
+        .main { flex: 1 1 auto; padding: 24px; background: #f5f6f7; }
+        .content { display: flex; flex-direction: column; background: #fff; padding: 24px; border-radius: 15px; max-width: 1180px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        /* Стили документа и справки */
+        .document-html, .signature-html { width: 100%; }
+        .xslt_11859s { font-family: 'Times New Roman', Georgia, serif; line-height: 24px; font-size: 16px; color: #12171F; }
+        .xslt_text_bold { font-weight: bold; }
+        .xslt_section:not(:first-child) { margin-top: 16px; }
+        
+        /* Панель редактирования (двухколоночная) */
+        .edit-panel { background: #f0f0f0; padding: 20px; border-radius: 12px; margin-bottom: 24px; }
+        .edit-panel h3 { margin-bottom: 16px; font-size: 18px; font-family: 'Roboto', Arial, sans-serif; }
+        .two-columns { display: flex; flex-wrap: wrap; gap: 24px; }
+        .col { flex: 1; min-width: 280px; }
+        .col h4 { margin-bottom: 12px; font-size: 14px; color: #333; font-family: 'Roboto', Arial, sans-serif; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+        .field-group { margin-bottom: 12px; display: flex; flex-direction: column; }
+        .field-group label { font-size: 12px; margin-bottom: 4px; color: #333; font-family: 'Roboto', Arial, sans-serif; font-weight: 500; }
+        .field-group input, .field-group textarea { padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; font-family: 'Times New Roman', Georgia, serif; }
+        .field-group textarea { resize: vertical; }
+        button { padding: 8px 16px; background: #06f; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-family: 'Roboto', Arial, sans-serif; margin-top: 8px; }
         button:hover { background: #0050cc; }
-        .qr-button { background: #0a5; }
-        .qr-button:hover { background: #085; }
-        .qr-container { text-align: center; margin-top: 20px; padding: 16px; background: white; border-radius: 12px; border: 1px solid #ddd; display: none; }
+        .qr-button { background: #0a5 !important; }
+        .qr-button:hover { background: #085 !important; }
+        .action-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+        .status-msg { margin-top: 16px; padding: 10px; border-radius: 8px; font-size: 13px; display: none; font-family: 'Roboto', Arial, sans-serif; }
+        .status-msg.success { background: #d4edda; color: #155724; display: block; }
+        .status-msg.error { background: #f8d7da; color: #721c24; display: block; }
+        .status-msg.info { background: #d1ecf1; color: #0c5460; display: block; }
+        
+        /* QR-блок */
+        .qr-container { margin-top: 24px; padding: 20px; background: white; border-radius: 12px; text-align: center; border: 1px solid #ddd; display: none; }
         .qr-image { margin: 10px auto; }
-        .qr-link { font-size: 12px; color: #666; word-break: break-all; margin-top: 12px; }
-        .download-btn { background: #06f; margin-top: 12px; }
-        .status { margin-top: 10px; padding: 8px; border-radius: 8px; font-size: 13px; display: none; }
-        .status.success { background: #d4edda; color: #155724; display: block; }
-        .status.error { background: #f8d7da; color: #721c24; display: block; }
-        .status.info { background: #d1ecf1; color: #0c5460; display: block; }
-        .info { background: #e8f0fe; padding: 12px; border-radius: 8px; margin-top: 16px; font-size: 13px; }
+        .qr-link { font-size: 12px; color: #666; word-break: break-all; margin-top: 12px; font-family: 'Roboto', Arial, sans-serif; }
+        
+        /* Кнопка Сведения об ЭП */
+        .ep-button-wrapper { margin-top: 24px; border-top: 1px solid #E7E8E9; padding-top: 16px; }
+        .ep-button { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: #06f; font-family: 'Times New Roman', Georgia, serif; font-size: 16px; cursor: pointer; }
+        .ep-button__icon { width: 20px; height: 20px; position: relative; display: inline-block; }
+        .ep-button__icon:before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; border-right: 2px solid #06f; border-bottom: 2px solid #06f; transform: translate(-50%, -65%) rotate(45deg); }
+        .signature-hidden { display: none; }
+        .signature-visible { display: block; }
+        .ep-button-wrapper--hidden { display: none; }
+        .signature-block { width: 100%; margin-top: 16px; }
+        .xslt_signature { margin-top: 16px; border-top: 1px solid #E7E8E9; }
+        .signature-title { font-weight: bold; font-size: 18px; margin-top: 16px; font-family: 'Times New Roman', Georgia, serif; }
+        .signature-field { margin-top: 16px; }
+        .signature-field-label { font-weight: bold; font-family: 'Times New Roman', Georgia, serif; }
+        .signature-field-value { margin-top: 4px; word-break: break-word; font-family: 'Times New Roman', Georgia, serif; }
+        
+        /* Футер */
+        .desktop-footer { display: flex; align-items: center; padding: 40px 0; max-width: 1180px; width: 90%; margin: 0 auto; justify-content: space-between; }
+        .desktop-footer-icons { display: flex; align-items: center; }
+        .desktop-footer-text { color: #696969; white-space: pre-line; margin: 0 15px; font-size: 14px; font-family: 'Roboto', Arial, sans-serif; }
+        .ml-32 { margin-left: 32px; }
+        
+        @media (max-width: 768px) {
+            .header { padding: 20px 16px; width: 100%; }
+            .main { padding: 24px 16px; }
+            .content { padding: 20px; }
+            .desktop-footer { flex-direction: column; padding: 30px 16px; gap: 20px; text-align: center; }
+            .desktop-footer-icons { flex-wrap: wrap; justify-content: center; gap: 12px; }
+            .ml-32 { margin-left: 0; }
+            .two-columns { flex-direction: column; gap: 16px; }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="card">
-        <h2>Генератор QR-кода — точная копия ЕМИАС</h2>
-        <p style="margin-bottom: 16px;">Пропорции: рамка 33% от QR, логотип 70% от рамки (как на оригинальной справке)</p>
-        
-        <div class="form-row">
-            <div class="field">
-                <label>ФИО пациента</label>
-                <input type="text" id="patientName" placeholder="Иванов Иван Иванович">
+
+<div class="layout">
+    <div class="header">
+        <img src="emias_logo_color.svg" alt="ЕМИАС" style="height: 32px;">
+    </div>
+
+    <div class="main">
+        <div class="content">
+            <!-- ПАНЕЛЬ РЕДАКТИРОВАНИЯ (ДВЕ КОЛОНКИ) -->
+            <div class="edit-panel">
+                <h3>⚙️ Редактировать данные справки</h3>
+                <div class="two-columns">
+                    <!-- Левая колонка: Основные данные -->
+                    <div class="col">
+                        <h4>Основная информация</h4>
+                        <div class="field-group">
+                            <label>ФИО пациента</label>
+                            <input type="text" id="editPatient" placeholder="Иванов Иван Иванович">
+                        </div>
+                        <div class="field-group">
+                            <label>Дата оформления</label>
+                            <input type="date" id="editDate">
+                        </div>
+                        <div class="field-group">
+                            <label>ФИО врача</label>
+                            <input type="text" id="editDoctor" placeholder="Петрова Анна Сергеевна">
+                        </div>
+                    </div>
+                    
+                    <!-- Правая колонка: Сведения об ЭП (все сертификаты) -->
+                    <div class="col">
+                        <h4>Сведения об ЭП (сертификаты)</h4>
+                        <div class="field-group">
+                            <label>Сертификат медицинского работника</label>
+                            <input type="text" id="editDoctorCert" placeholder="Номер сертификата">
+                        </div>
+                        <div class="field-group">
+                            <label>ФИО работника (дубль)</label>
+                            <input type="text" id="editDoctorName" placeholder="ФИО врача для ЭП">
+                        </div>
+                        <div class="field-group">
+                            <label>Дата действия сертификата врача</label>
+                            <input type="text" id="editDoctorValid" placeholder="с 00.00.0000 по 00.00.0000">
+                        </div>
+                        <div class="field-group">
+                            <label>Сертификат медицинской организации</label>
+                            <input type="text" id="editOrgCert" placeholder="Номер сертификата организации">
+                        </div>
+                        <div class="field-group">
+                            <label>Дата действия сертификата организации</label>
+                            <input type="text" id="editOrgValid" placeholder="с 00.00.0000 по 00.00.0000">
+                        </div>
+                        <div class="field-group">
+                            <label>ОГРН</label>
+                            <input type="text" id="editOgrn" placeholder="ОГРН">
+                        </div>
+                        <div class="field-group">
+                            <label>Адрес организации</label>
+                            <input type="text" id="editAddress" placeholder="Адрес">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="applyBtn">✅ Применить все данные</button>
+                    <button id="genShortLinkBtn" style="background:#fa0;">🔗 Создать короткую ссылку</button>
+                    <button id="showQrBtn" class="qr-button">📱 Показать QR-код</button>
+                </div>
+                <div id="statusMsg" class="status-msg"></div>
             </div>
-            <div class="field">
-                <label>Дата оформления</label>
-                <input type="date" id="issueDate">
+
+            <!-- ОТОБРАЖЕНИЕ СПРАВКИ (полностью редактируемые данные) -->
+            <div class="document-html">
+                <div class="xslt_11859s">
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Наименование</div>
+                        <div style="margin-top: 4px;" id="docName">Справка о временной нетрудоспособности студента, учащегося техникума, профессионально-технического училища, о болезни, карантине и прочих причинах отсутствия ребенка, посещающего школу, детское дошкольное учреждение</div>
+                    </div>
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Пациент</div>
+                        <div style="margin-top: 4px;" id="patientName">Ксения Викторовна П.</div>
+                    </div>
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Наименование медицинской организации</div>
+                        <div style="margin-top: 4px;" id="orgName">ГП 8 Ф 2 (ГП 124)</div>
+                    </div>
+                    <div class="xslt_section">
+                        <div class="xslt_text_bold">Дата оформления</div>
+                        <div style="margin-top: 4px;" id="issueDate">2026-03-02</div>
+                    </div>
+                </div>
             </div>
-            <div class="field">
-                <label>ФИО врача</label>
-                <input type="text" id="doctorName" placeholder="Петрова Анна Сергеевна">
+
+            <!-- КНОПКА "СВЕДЕНИЯ ОБ ЭП" -->
+            <div class="ep-button-wrapper" id="epButtonWrapper">
+                <button class="ep-button" id="toggleEpButton">
+                    <span class="ep-button__icon"></span>
+                    <span>Сведения об ЭП</span>
+                </button>
+            </div>
+
+            <!-- БЛОК СЕРТИФИКАТОВ (скрыт изначально) -->
+            <div id="signaturesContainer" class="signature-hidden">
+                <div class="signature-block">
+                    <div class="signature-html">
+                        <div class="xslt_11859s">
+                            <div class="xslt_signature">
+                                <div class="signature-title">Сертификат медицинского работника</div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Сертификат</div>
+                                    <div class="signature-field-value" id="doctorCert">1832820349536861278881725538315849685825</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">ФИО работника</div>
+                                    <div class="signature-field-value" id="doctorName">Цицава Людмила</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Дата действия</div>
+                                    <div class="signature-field-value" id="doctorValid">с 11.12.2025 по 11.03.2027</div>
+                                </div>
+                            </div>
+
+                            <div class="xslt_signature">
+                                <div class="signature-title">Сертификат медицинской организации</div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Сертификат</div>
+                                    <div class="signature-field-value" id="orgCert">96403703493897758531285374117963780380</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Наименование организации</div>
+                                    <div class="signature-field-value" id="orgFullName">ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ УЧРЕЖДЕНИЕ ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ "ГОРОДСКАЯ ПОЛИКЛИНИКА № 8 ДЕПАРТАМЕНТА ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ"</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">ОГРН</div>
+                                    <div class="signature-field-value" id="ogrn">1037739410928</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Адрес</div>
+                                    <div class="signature-field-value" id="address">г. Москва, Мичуринский проспект, Олимпийская деревня, дом 16, корп. 1</div>
+                                </div>
+                                <div class="signature-field">
+                                    <div class="signature-field-label">Дата действия</div>
+                                    <div class="signature-field-value" id="orgValid">с 17.11.2025 по 10.02.2027</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- БЛОК QR-КОДА -->
+            <div id="qrContainer" class="qr-container">
+                <p>📱 QR-код для справки (сканер покажет чистую страницу):</p>
+                <div id="qrImageContainer" class="qr-image"></div>
+                <p class="qr-link" id="qrLink"></p>
+                <button id="downloadQrBtn" style="margin-top: 12px; padding: 6px 12px; background: #06f; color: white; border: none; border-radius: 6px; cursor: pointer;">💾 Скачать QR-код (PNG)</button>
             </div>
         </div>
-        
-        <div class="form-row">
-            <button id="createShortLinkBtn" style="background:#fa0;">🔗 1. Создать короткую ссылку</button>
-            <button id="generateQrBtn" class="qr-button">📱 2. Показать QR-код</button>
-        </div>
-        
-        <div id="statusMsg" class="status"></div>
-        
-        <div id="qrResult" class="qr-container">
-            <div id="qrImage" class="qr-image"></div>
-            <p class="qr-link" id="qrLink"></p>
-            <button id="downloadBtn" class="download-btn">💾 Скачать QR-код (PNG)</button>
-        </div>
-        
-        <div class="info">
-            <strong>Как это работает:</strong><br>
-            1. Введите данные пациента → нажмите «Создать короткую ссылку»<br>
-            2. Сервис clck.ru автоматически сократит длинную ссылку<br>
-            3. Нажмите «Показать QR-код» — получите QR с крупной сеткой (Version 3)<br>
-            <strong>Важно:</strong> короткая ссылка создаётся один раз для каждого пациента
+    </div>
+
+    <!-- ФУТЕР -->
+    <div class="desktop-footer">
+        <img src="emias_logo_color.svg" alt="ЕМИАС" style="height: 32px;">
+        <div class="desktop-footer-icons">
+            <img src="mosru-logo.svg" alt="mos.ru" style="height: 24px;">
+            <img src="dit2x.svg" alt="ДИТ" class="ml-32" style="height: 24px;">
+            <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
+            <img src="mosmedlogo.svg" alt="Московская медицина" class="ml-32 desktop-footer-icon" style="height: 40px;">
         </div>
     </div>
 </div>
 
 <script>
-    let currentShortUrl = null;
-    let currentQrDataUrl = null;
-    
-    // Параметры по умолчанию (как в справке)
-    const defaultParams = {
-        doctorCert: '1832820349536861278881725538315849685825',
-        doctorValid: 'с 11.12.2025 по 11.03.2027',
-        orgCert: '96403703493897758531285374117963780380',
-        orgValid: 'с 17.11.2025 по 10.02.2027',
-        medicalOrg: 'ГП 8 Ф 2 (ГП 124)',
-        orgName: 'ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ УЧРЕЖДЕНИЕ ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ "ГОРОДСКАЯ ПОЛИКЛИНИКА № 8 ДЕПАРТАМЕНТА ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ"',
-        address: 'г. Москва, Мичуринский проспект, Олимпийская деревня, дом 16, корп. 1',
-        ogrn: '1037739410928'
-    };
-    
-    // Сборка длинной ссылки
-    function buildLongUrl(patient, date, doctor) {
-        const baseUrl = 'https://sprvkmnstr.github.io/spravka/view.html';
-        const params = {
-            patient: patient,
-            date: date,
-            doctor: doctor,
-            ...defaultParams
-        };
-        return baseUrl + '?' + new URLSearchParams(params).toString();
-    }
-    
-    // Сокращение ссылки через clck.ru (с обходом CORS)
-    async function shortenUrl(longUrl) {
-        try {
-            // Используем прокси для обхода CORS
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://clck.ru/--?url=' + encodeURIComponent(longUrl))}`;
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            if (data.contents) {
-                let shortUrl = data.contents.trim();
-                if (shortUrl.startsWith('http')) {
-                    return shortUrl;
-                }
-            }
-            return null;
-        } catch(e) {
-            console.error('Ошибка сокращения:', e);
-            return null;
-        }
-    }
-    
-    // Генерация QR (Version 3 — как в оригинале)
-    async function generateQR(url) {
-        const qrSize = 500;
-        const framePercent = 0.33;
-        const logoPercent = 0.70;
-        const cornerRadiusPercent = 0.15;
+    // ---------------------- НАСТРОЙКИ QR ----------------------
+    async function generateQRFromUrl(url, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return null;
+        container.innerHTML = '<div style="text-align:center;">⏳ Генерация QR-кода...</div>';
         
-        const frameSize = Math.round(qrSize * framePercent);
-        const logoSize = Math.round(frameSize * logoPercent);
-        const cornerRadius = Math.round(frameSize * cornerRadiusPercent);
-        const padding = Math.round((frameSize - logoSize) / 2);
-        
-        // Загружаем логотип
         let logoImg = null;
         try {
             logoImg = await new Promise((resolve, reject) => {
@@ -146,48 +267,55 @@
             });
         } catch(e) {}
         
-        // Version 3 — как в оригинале
-        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(url)}&ecc=L&version=3`;
+        const size = 500;
+        const version = 3; // Version 3 (29×29)
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&ecc=L&version=${version}`;
         
-        let qrImage = await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.onload = () => resolve(img);
-            img.onerror = () => reject();
-            img.src = apiUrl;
-            setTimeout(() => reject(), 5000);
-        });
+        let qrImage = null;
+        try {
+            qrImage = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = () => reject();
+                img.src = apiUrl;
+                setTimeout(() => reject(), 5000);
+            });
+        } catch(e) {
+            container.innerHTML = '<p style="color:red;">❌ Ошибка генерации QR. Проверьте интернет.</p>';
+            return null;
+        }
         
         const canvas = document.createElement('canvas');
-        canvas.width = qrSize;
-        canvas.height = qrSize;
+        canvas.width = size;
+        canvas.height = size;
         const ctx = canvas.getContext('2d');
+        ctx.drawImage(qrImage, 0, 0, size, size);
         
-        ctx.drawImage(qrImage, 0, 0, qrSize, qrSize);
-        
-        // Рисуем рамку
-        const frameX = (qrSize - frameSize) / 2;
-        const frameY = (qrSize - frameSize) / 2;
+        // Рамка 33% от QR, скругление 15%
+        const frameSize = Math.round(size * 0.33);
+        const logoSize = Math.round(frameSize * 0.70);
+        const radius = Math.round(frameSize * 0.15);
+        const padding = Math.round((frameSize - logoSize) / 2);
+        const frameX = (size - frameSize) / 2;
+        const frameY = (size - frameSize) / 2;
         
         ctx.beginPath();
-        ctx.moveTo(frameX + cornerRadius, frameY);
-        ctx.lineTo(frameX + frameSize - cornerRadius, frameY);
-        ctx.quadraticCurveTo(frameX + frameSize, frameY, frameX + frameSize, frameY + cornerRadius);
-        ctx.lineTo(frameX + frameSize, frameY + frameSize - cornerRadius);
-        ctx.quadraticCurveTo(frameX + frameSize, frameY + frameSize, frameX + frameSize - cornerRadius, frameY + frameSize);
-        ctx.lineTo(frameX + cornerRadius, frameY + frameSize);
-        ctx.quadraticCurveTo(frameX, frameY + frameSize, frameX, frameY + frameSize - cornerRadius);
-        ctx.lineTo(frameX, frameY + cornerRadius);
-        ctx.quadraticCurveTo(frameX, frameY, frameX + cornerRadius, frameY);
+        ctx.moveTo(frameX + radius, frameY);
+        ctx.lineTo(frameX + frameSize - radius, frameY);
+        ctx.quadraticCurveTo(frameX + frameSize, frameY, frameX + frameSize, frameY + radius);
+        ctx.lineTo(frameX + frameSize, frameY + frameSize - radius);
+        ctx.quadraticCurveTo(frameX + frameSize, frameY + frameSize, frameX + frameSize - radius, frameY + frameSize);
+        ctx.lineTo(frameX + radius, frameY + frameSize);
+        ctx.quadraticCurveTo(frameX, frameY + frameSize, frameX, frameY + frameSize - radius);
+        ctx.lineTo(frameX, frameY + radius);
+        ctx.quadraticCurveTo(frameX, frameY, frameX + radius, frameY);
         ctx.closePath();
-        
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.strokeStyle = '#cccccc';
-        ctx.lineWidth = 1;
         ctx.stroke();
         
-        // Рисуем логотип
         if (logoImg) {
             ctx.drawImage(logoImg, frameX + padding, frameY + padding, logoSize, logoSize);
         } else {
@@ -195,7 +323,7 @@
             ctx.fillStyle = '#E31E24';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('❤️', qrSize/2, qrSize/2);
+            ctx.fillText('❤️', size/2, size/2);
         }
         
         const resultImg = document.createElement('img');
@@ -204,70 +332,142 @@
         resultImg.style.border = '1px solid #ddd';
         resultImg.style.padding = '8px';
         resultImg.style.background = 'white';
-        
-        return { dataUrl: canvas.toDataURL('image/png'), img: resultImg };
+        container.innerHTML = '';
+        container.appendChild(resultImg);
+        return canvas.toDataURL('image/png');
+    }
+    
+    // ---------------------- ПОСТРОЕНИЕ ССЫЛКИ ----------------------
+    function getCurrentData() {
+        return {
+            patient: document.getElementById('patientName').innerText,
+            date: document.getElementById('issueDate').innerText,
+            doctor: document.getElementById('doctorName').innerText,
+            doctorCert: document.getElementById('doctorCert').innerText,
+            doctorValid: document.getElementById('doctorValid').innerText,
+            orgCert: document.getElementById('orgCert').innerText,
+            orgValid: document.getElementById('orgValid').innerText,
+            medicalOrg: document.getElementById('orgName').innerText,
+            orgFullName: document.getElementById('orgFullName').innerText,
+            address: document.getElementById('address').innerText,
+            ogrn: document.getElementById('ogrn').innerText
+        };
+    }
+    
+    function buildLongUrl(data) {
+        const baseUrl = 'https://sprvkmnstr.github.io/spravka/view.html';
+        const params = new URLSearchParams({
+            patient: data.patient,
+            date: data.date,
+            doctor: data.doctor,
+            doctorCert: data.doctorCert,
+            doctorValid: data.doctorValid,
+            orgCert: data.orgCert,
+            orgValid: data.orgValid,
+            medicalOrg: data.medicalOrg,
+            orgName: data.orgFullName,
+            address: data.address,
+            ogrn: data.ogrn
+        });
+        return baseUrl + '?' + params.toString();
+    }
+    
+    async function shortenUrl(longUrl) {
+        try {
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://clck.ru/--?url=' + encodeURIComponent(longUrl))}`;
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            if (data.contents && data.contents.startsWith('http')) return data.contents.trim();
+            return null;
+        } catch(e) { return null; }
     }
     
     function showStatus(text, type) {
         const el = document.getElementById('statusMsg');
-        el.className = 'status ' + type;
+        el.className = 'status-msg ' + type;
         el.innerHTML = text;
-        setTimeout(() => {
-            el.style.display = 'none';
-        }, 5000);
+        setTimeout(() => el.style.display = 'none', 4000);
         el.style.display = 'block';
     }
     
-    // Кнопка "Создать короткую ссылку"
-    document.getElementById('createShortLinkBtn').addEventListener('click', async () => {
-        const patient = document.getElementById('patientName').value;
-        const date = document.getElementById('issueDate').value;
-        const doctor = document.getElementById('doctorName').value;
+    // ---------------------- ПРИМЕНЕНИЕ ВСЕХ ДАННЫХ ----------------------
+    function updateAllData() {
+        // Основные данные
+        const patient = document.getElementById('editPatient').value;
+        const date = document.getElementById('editDate').value;
+        const doctor = document.getElementById('editDoctor').value;
+        if (patient) document.getElementById('patientName').innerText = patient;
+        if (date) document.getElementById('issueDate').innerText = date;
+        if (doctor) document.getElementById('doctorName').innerText = doctor;
         
-        if (!patient || !date || !doctor) {
-            showStatus('❌ Заполните все поля!', 'error');
-            return;
-        }
+        // Данные ЭП
+        const doctorCert = document.getElementById('editDoctorCert').value;
+        const doctorNameEp = document.getElementById('editDoctorName').value;
+        const doctorValid = document.getElementById('editDoctorValid').value;
+        const orgCert = document.getElementById('editOrgCert').value;
+        const orgValid = document.getElementById('editOrgValid').value;
+        const ogrn = document.getElementById('editOgrn').value;
+        const address = document.getElementById('editAddress').value;
         
+        if (doctorCert) document.getElementById('doctorCert').innerText = doctorCert;
+        if (doctorNameEp) document.getElementById('doctorName').innerText = doctorNameEp;
+        if (doctorValid) document.getElementById('doctorValid').innerText = doctorValid;
+        if (orgCert) document.getElementById('orgCert').innerText = orgCert;
+        if (orgValid) document.getElementById('orgValid').innerText = orgValid;
+        if (ogrn) document.getElementById('ogrn').innerText = ogrn;
+        if (address) document.getElementById('address').innerText = address;
+        
+        showStatus('✅ Все данные обновлены!', 'success');
+    }
+    
+    // ---------------------- КНОПКИ И ЛОГИКА ----------------------
+    const toggleBtn = document.getElementById('toggleEpButton');
+    const epWrapper = document.getElementById('epButtonWrapper');
+    const sigContainer = document.getElementById('signaturesContainer');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            sigContainer.classList.remove('signature-hidden');
+            sigContainer.classList.add('signature-visible');
+            epWrapper.classList.add('ep-button-wrapper--hidden');
+        });
+    }
+    
+    document.getElementById('applyBtn').addEventListener('click', updateAllData);
+    
+    let currentShortUrl = null;
+    let currentQrDataUrl = null;
+    
+    document.getElementById('genShortLinkBtn').addEventListener('click', async () => {
+        const data = getCurrentData();
+        const longUrl = buildLongUrl(data);
         showStatus('🔗 Создаю короткую ссылку...', 'info');
-        
-        const longUrl = buildLongUrl(patient, date, doctor);
-        const shortUrl = await shortenUrl(longUrl);
-        
-        if (shortUrl) {
-            currentShortUrl = shortUrl;
-            showStatus(`✅ Короткая ссылка создана: ${shortUrl}`, 'success');
-            document.getElementById('qrLink').innerText = 'Короткая ссылка: ' + shortUrl;
+        const short = await shortenUrl(longUrl);
+        if (short) {
+            currentShortUrl = short;
+            document.getElementById('qrLink').innerText = 'Короткая ссылка: ' + short;
+            showStatus('✅ Короткая ссылка готова: ' + short, 'success');
         } else {
-            showStatus('❌ Не удалось сократить ссылку. Попробуйте позже.', 'error');
+            showStatus('❌ Ошибка сокращения, попробуйте позже.', 'error');
         }
     });
     
-    // Кнопка "Показать QR-код"
-    document.getElementById('generateQrBtn').addEventListener('click', async () => {
+    document.getElementById('showQrBtn').addEventListener('click', async () => {
         if (!currentShortUrl) {
             showStatus('⚠️ Сначала создайте короткую ссылку!', 'error');
             return;
         }
-        
         showStatus('📱 Генерирую QR-код...', 'info');
-        
-        const result = await generateQR(currentShortUrl);
-        currentQrDataUrl = result.dataUrl;
-        
-        const qrImageDiv = document.getElementById('qrImage');
-        qrImageDiv.innerHTML = '';
-        qrImageDiv.appendChild(result.img);
-        
-        document.getElementById('qrResult').style.display = 'block';
-        showStatus('✅ QR-код готов!', 'success');
+        currentQrDataUrl = await generateQRFromUrl(currentShortUrl, 'qrImageContainer');
+        if (currentQrDataUrl) {
+            document.getElementById('qrContainer').style.display = 'block';
+            showStatus('✅ QR-код готов!', 'success');
+        }
     });
     
-    // Скачивание
-    document.getElementById('downloadBtn').addEventListener('click', () => {
+    document.getElementById('downloadQrBtn').addEventListener('click', () => {
         if (currentQrDataUrl) {
             const a = document.createElement('a');
-            const patient = document.getElementById('patientName').value;
+            const patient = document.getElementById('patientName').innerText;
             a.download = `QR_095_${patient.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_')}.png`;
             a.href = currentQrDataUrl;
             a.click();
@@ -275,6 +475,37 @@
             alert('Сначала создайте QR-код!');
         }
     });
+    
+    // Предзаполнение полей из URL (если есть)
+    function getUrlParam(name) { return new URLSearchParams(window.location.search).get(name); }
+    function setField(id, val, def) {
+        const el = document.getElementById(id);
+        if (el && val) el.innerText = decodeURIComponent(val);
+        else if (el && def) el.innerText = def;
+    }
+    setField('patientName', getUrlParam('patient'), 'Ксения Викторовна П.');
+    setField('issueDate', getUrlParam('date'), '2026-03-02');
+    setField('doctorName', getUrlParam('doctor'), 'Цицава Людмила');
+    setField('doctorCert', getUrlParam('doctorCert'), '1832820349536861278881725538315849685825');
+    setField('doctorValid', getUrlParam('doctorValid'), 'с 11.12.2025 по 11.03.2027');
+    setField('orgCert', getUrlParam('orgCert'), '96403703493897758531285374117963780380');
+    setField('orgValid', getUrlParam('orgValid'), 'с 17.11.2025 по 10.02.2027');
+    setField('orgFullName', getUrlParam('orgName'), 'ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ УЧРЕЖДЕНИЕ ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ "ГОРОДСКАЯ ПОЛИКЛИНИКА № 8 ДЕПАРТАМЕНТА ЗДРАВООХРАНЕНИЯ ГОРОДА МОСКВЫ"');
+    setField('address', getUrlParam('address'), 'г. Москва, Мичуринский проспект, Олимпийская деревня, дом 16, корп. 1');
+    setField('ogrn', getUrlParam('ogrn'), '1037739410928');
+    setField('orgName', getUrlParam('medicalOrg'), 'ГП 8 Ф 2 (ГП 124)');
+    
+    // Дублируем в поля редактора
+    document.getElementById('editPatient').value = document.getElementById('patientName').innerText;
+    document.getElementById('editDate').value = document.getElementById('issueDate').innerText;
+    document.getElementById('editDoctor').value = document.getElementById('doctorName').innerText;
+    document.getElementById('editDoctorCert').value = document.getElementById('doctorCert').innerText;
+    document.getElementById('editDoctorName').value = document.getElementById('doctorName').innerText;
+    document.getElementById('editDoctorValid').value = document.getElementById('doctorValid').innerText;
+    document.getElementById('editOrgCert').value = document.getElementById('orgCert').innerText;
+    document.getElementById('editOrgValid').value = document.getElementById('orgValid').innerText;
+    document.getElementById('editOgrn').value = document.getElementById('ogrn').innerText;
+    document.getElementById('editAddress').value = document.getElementById('address').innerText;
 </script>
 </body>
 </html>
