@@ -185,7 +185,7 @@
 </div>
 
 <script>
-    // Генерация QR с Version 5 (37×37 модулей) — как на оригинальной справке
+    // Генерация QR с Version 1 (21×21 модулей) — максимально крупный QR
     async function generateQRWithLogo(text, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return null;
@@ -205,9 +205,9 @@
             });
         } catch(e) {}
         
-        // Version 5 = 37×37 модулей (как на оригинальной справке)
-        // size=300 — увеличил размер для чёткости
-        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}&ecc=L&version=5`;
+        // Version 1 = 21×21 модулей (САМЫЙ КРУПНЫЙ QR)
+        // size=400 — большой размер для чёткости
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(text)}&ecc=L&version=1`;
         
         let qrImage = null;
         try {
@@ -226,14 +226,14 @@
         
         // Создаём canvas
         const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 300;
+        canvas.width = 400;
+        canvas.height = 400;
         const ctx = canvas.getContext('2d');
         
-        ctx.drawImage(qrImage, 0, 0, 300, 300);
+        ctx.drawImage(qrImage, 0, 0, 400, 400);
         
-        // Белый круг в центре
-        const centerX = 150, centerY = 150, radius = 42;
+        // Белый круг в центре (для 21×21 — круг можно побольше)
+        const centerX = 200, centerY = 200, radius = 55;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.fillStyle = '#ffffff';
@@ -244,10 +244,10 @@
         
         // Логотип или сердечко
         if (logoImg) {
-            const logoSize = 48;
+            const logoSize = 60;
             ctx.drawImage(logoImg, centerX - logoSize/2, centerY - logoSize/2, logoSize, logoSize);
         } else {
-            ctx.font = '32px "Segoe UI Emoji", "Apple Color Emoji"';
+            ctx.font = '40px "Segoe UI Emoji", "Apple Color Emoji"';
             ctx.fillStyle = '#E31E24';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -256,8 +256,8 @@
         
         const resultImg = document.createElement('img');
         resultImg.src = canvas.toDataURL('image/png');
-        resultImg.style.width = '200px';
-        resultImg.style.height = '200px';
+        resultImg.style.width = '220px';
+        resultImg.style.height = '220px';
         resultImg.style.display = 'block';
         resultImg.style.margin = '0 auto';
         resultImg.style.border = '1px solid #ddd';
@@ -270,7 +270,7 @@
         return canvas.toDataURL('image/png');
     }
 
-    // Остальной код без изменений
+    // Остальной код
     const toggleButton = document.getElementById('toggleEpButton');
     const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
