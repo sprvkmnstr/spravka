@@ -185,7 +185,7 @@
 </div>
 
 <script>
-    // Упрощённая генерация QR — крупные квадратики
+    // Генерация QR с Version 5 (37×37 модулей) — как на оригинальной справке
     async function generateQRWithLogo(text, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return null;
@@ -205,8 +205,9 @@
             });
         } catch(e) {}
         
-        // Генерируем QR с низким уровнем коррекции (меньше квадратиков)
-        const apiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=250&margin=2&ecLevel=L`;
+        // Version 5 = 37×37 модулей (как на оригинальной справке)
+        // size=300 — увеличил размер для чёткости
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}&ecc=L&version=5`;
         
         let qrImage = null;
         try {
@@ -225,24 +226,28 @@
         
         // Создаём canvas
         const canvas = document.createElement('canvas');
-        canvas.width = 250;
-        canvas.height = 250;
+        canvas.width = 300;
+        canvas.height = 300;
         const ctx = canvas.getContext('2d');
         
-        ctx.drawImage(qrImage, 0, 0, 250, 250);
+        ctx.drawImage(qrImage, 0, 0, 300, 300);
         
         // Белый круг в центре
-        const centerX = 125, centerY = 125, radius = 32;
+        const centerX = 150, centerY = 150, radius = 42;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
+        ctx.strokeStyle = '#dddddd';
+        ctx.lineWidth = 1;
+        ctx.stroke();
         
         // Логотип или сердечко
         if (logoImg) {
-            ctx.drawImage(logoImg, centerX - 18, centerY - 18, 36, 36);
+            const logoSize = 48;
+            ctx.drawImage(logoImg, centerX - logoSize/2, centerY - logoSize/2, logoSize, logoSize);
         } else {
-            ctx.font = '26px "Segoe UI Emoji", "Apple Color Emoji"';
+            ctx.font = '32px "Segoe UI Emoji", "Apple Color Emoji"';
             ctx.fillStyle = '#E31E24';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
