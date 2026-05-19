@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Сокращение ссылок</title>
+</head>
+<body>
+    <script>
+        // Получаем длинную ссылку из URL
+        const longUrl = new URLSearchParams(window.location.search).get('url');
+        if (longUrl) {
+            // Отправляем запрос на сервис clck.ru
+            fetch('https://clck.ru/--?url=' + encodeURIComponent(longUrl), {
+                method: 'GET',
+                mode: 'cors'
+            })
+            .then(response => response.text())
+            .then(shortUrl => {
+                // Возвращаем короткую ссылку
+                document.body.innerText = shortUrl;
+            })
+            .catch(() => {
+                document.body.innerText = 'ERROR';
+            });
+        } else {
+            document.body.innerText = 'NO_URL';
+        }
+    </script>
+</body>
+</html>
