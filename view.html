@@ -21,21 +21,21 @@
             height: 100%;
         }
 
-        /* Шапка */
+        /* ШАПКА С ФОНОВОЙ ПОЛОСОЙ ВО ВСЮ ШИРИНУ */
+        .header-wrapper {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
         .header {
-            padding: 30px 0 20px 0;
+            padding: 30px 0;
             max-width: 1180px;
             width: 90%;
             margin: 0 auto;
         }
 
-        /* БОЛЬШАЯ ГОРИЗОНТАЛЬНАЯ ПОЛОСА ПОД ШАПКОЙ */
-        .top-divider {
-            width: 100%;
-            height: 216px;
-            background: #ffffff;
-            margin: 0;
-        }
+        /* ФОНОВАЯ ПОЛОСА ПОД ШАПКОЙ — САМА ШАПКА УЖЕ ИМЕЕТ ФОН */
+        /* В оригинале это просто фон всего блока .header-wrapper */
 
         .main {
             flex: 1 1 auto;
@@ -147,23 +147,21 @@
             display: block;
         }
 
-        /* Футер */
+        /* ФУТЕР С ФОНОВОЙ ПОЛОСОЙ ВО ВСЮ ШИРИНУ */
+        .footer-wrapper {
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            margin-top: auto;
+        }
+
         .desktop-footer {
             display: flex;
             align-items: center;
-            padding: 30px 0 30px 0;
+            padding: 30px 0;
             max-width: 1180px;
             width: 90%;
             margin: 0 auto;
             justify-content: space-between;
-        }
-
-        /* БОЛЬШАЯ ГОРИЗОНТАЛЬНАЯ ПОЛОСА НАД ФУТЕРОМ */
-        .bottom-divider {
-            width: 100%;
-            height: 216px;
-            background: #ffffff;
-            margin: 0;
         }
 
         .desktop-footer-icons {
@@ -218,13 +216,12 @@
 <body>
 
 <div class="layout">
-    <!-- Шапка -->
-    <div class="header">
-        <img src="emias_logo_color.svg" alt="ЕМИАС">
+    <!-- ШАПКА С БЕЛЫМ ФОНОМ (полоса во всю ширину) -->
+    <div class="header-wrapper">
+        <div class="header">
+            <img src="emias_logo_color.svg" alt="ЕМИАС">
+        </div>
     </div>
-
-    <!-- БОЛЬШАЯ ПОЛОСА ПОД ШАПКОЙ -->
-    <div class="top-divider"></div>
 
     <div class="main">
         <div class="content">
@@ -298,24 +295,23 @@
         </div>
     </div>
 
-    <!-- БОЛЬШАЯ ПОЛОСА НАД ФУТЕРОМ -->
-    <div class="bottom-divider"></div>
-
-    <!-- Футер -->
-    <div class="desktop-footer">
-        <div class="footer-logo-group">
-            <img src="emias_logo_color.svg" alt="ЕМИАС">
-        </div>
-        <div class="desktop-footer-icons">
+    <!-- ФУТЕР С БЕЛЫМ ФОНОМ (полоса во всю ширину) -->
+    <div class="footer-wrapper">
+        <div class="desktop-footer">
             <div class="footer-logo-group">
-                <img src="mosru-logo.svg" alt="mos.ru">
+                <img src="emias_logo_color.svg" alt="ЕМИАС">
             </div>
-            <div class="footer-logo-group">
-                <img src="dit2x.svg" alt="ДИТ">
-            </div>
-            <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
-            <div class="footer-logo-group">
-                <img src="mosmedlogo.svg" alt="Московская медицина" class="desktop-footer-icon">
+            <div class="desktop-footer-icons">
+                <div class="footer-logo-group">
+                    <img src="mosru-logo.svg" alt="mos.ru">
+                </div>
+                <div class="footer-logo-group">
+                    <img src="dit2x.svg" alt="ДИТ">
+                </div>
+                <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
+                <div class="footer-logo-group">
+                    <img src="mosmedlogo.svg" alt="Московская медицина" class="desktop-footer-icon">
+                </div>
             </div>
         </div>
     </div>
