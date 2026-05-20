@@ -15,14 +15,12 @@
             background: #f5f6f7;
         }
 
-        /* Основной контейнер */
         .layout {
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
-        /* Шапка */
         .header {
             padding: 30px 0;
             max-width: 1180px;
@@ -30,14 +28,12 @@
             margin: 0 auto;
         }
 
-        /* Основное содержимое */
         .main {
             flex: 1 1 auto;
             padding: 24px;
             background: #f5f6f7;
         }
 
-        /* Белая карточка */
         .content {
             display: flex;
             flex-direction: column;
@@ -48,7 +44,6 @@
             margin: 0 auto;
         }
 
-        /* Стили текста справки */
         .xslt_11859s {
             font-family: 'Open Sans', Roboto, Arial, sans-serif;
             line-height: 24px;
@@ -64,7 +59,7 @@
             margin-top: 16px;
         }
 
-        /* Блок сертификатов (как в оригинале — раскрывается без исчезновения кнопки) */
+        /* Блок сертификатов */
         .signature-block {
             width: 100%;
             margin-top: 16px;
@@ -94,7 +89,7 @@
             word-break: break-word;
         }
 
-        /* Кнопка "Сведения об ЭП" — как в оригинале */
+        /* Кнопка "Сведения об ЭП" */
         .signature-button-wrapper {
             padding-top: 16px;
             border-top: 1px solid #e7e8e9;
@@ -133,11 +128,12 @@
             transform: translate(-50%, -65%) rotate(45deg);
         }
 
-        /* Поворот иконки при раскрытии */
-        .signature-button--expanded .signature-button__icon:before {
-            transform: translate(-50%, -35%) rotate(-135deg);
+        /* Кнопка скрыта */
+        .ep-button-wrapper--hidden {
+            display: none;
         }
 
+        /* Блок сертификатов скрыт изначально */
         .signature-hidden {
             display: none;
         }
@@ -146,7 +142,7 @@
             display: block;
         }
 
-        /* Футер — точная копия оригинала */
+        /* Футер */
         .desktop-footer {
             display: flex;
             align-items: center;
@@ -176,7 +172,6 @@
             margin-left: 32px;
         }
 
-        /* Мобильная версия */
         @media (max-width: 768px) {
             .header {
                 padding: 20px 16px;
@@ -208,15 +203,12 @@
 <body>
 
 <div class="layout">
-    <!-- Шапка -->
     <div class="header">
         <img src="emias_logo_color.svg" alt="ЕМИАС">
     </div>
 
-    <!-- Основной контент -->
     <div class="main">
         <div class="content">
-            <!-- Данные справки -->
             <div class="xslt_11859s">
                 <div class="xslt_section">
                     <div class="xslt_text_bold">Наименование</div>
@@ -236,8 +228,8 @@
                 </div>
             </div>
 
-            <!-- Кнопка "Сведения об ЭП" (как в оригинале — не пропадает) -->
-            <div class="signature-button-wrapper">
+            <!-- Кнопка "Сведения об ЭП" — после нажатия пропадает -->
+            <div class="signature-button-wrapper" id="epButtonWrapper">
                 <button class="signature-button" id="toggleEpButton">
                     <span class="signature-button__icon"></span>
                     <span>Сведения об ЭП</span>
@@ -291,7 +283,6 @@
         </div>
     </div>
 
-    <!-- Футер — как в оригинале (без белых полос) -->
     <div class="desktop-footer">
         <img src="emias_logo_color.svg" alt="ЕМИАС">
         <div class="desktop-footer-icons">
@@ -304,21 +295,18 @@
 </div>
 
 <script>
-    // Кнопка "Сведения об ЭП" — как в оригинале: при нажатии раскрывается, кнопка остаётся, иконка поворачивается
+    // Кнопка "Сведения об ЭП" — при нажатии пропадает навсегда, показываем сертификаты
     const toggleButton = document.getElementById('toggleEpButton');
+    const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
 
-    if (toggleButton && signaturesContainer) {
+    if (toggleButton && epButtonWrapper && signaturesContainer) {
         toggleButton.addEventListener('click', function() {
-            if (signaturesContainer.classList.contains('signature-hidden')) {
-                signaturesContainer.classList.remove('signature-hidden');
-                signaturesContainer.classList.add('signature-visible');
-                toggleButton.classList.add('signature-button--expanded');
-            } else {
-                signaturesContainer.classList.remove('signature-visible');
-                signaturesContainer.classList.add('signature-hidden');
-                toggleButton.classList.remove('signature-button--expanded');
-            }
+            // Показываем сертификаты
+            signaturesContainer.classList.remove('signature-hidden');
+            signaturesContainer.classList.add('signature-visible');
+            // Прячем кнопку навсегда
+            epButtonWrapper.classList.add('ep-button-wrapper--hidden');
         });
     }
 
