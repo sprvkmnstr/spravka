@@ -59,7 +59,6 @@
             margin-top: 16px;
         }
 
-        /* Блок сертификатов */
         .signature-block {
             width: 100%;
             margin-top: 16px;
@@ -89,7 +88,6 @@
             word-break: break-word;
         }
 
-        /* Кнопка "Сведения об ЭП" */
         .signature-button-wrapper {
             padding-top: 16px;
             border-top: 1px solid #e7e8e9;
@@ -128,12 +126,10 @@
             transform: translate(-50%, -65%) rotate(45deg);
         }
 
-        /* Кнопка скрыта */
         .ep-button-wrapper--hidden {
             display: none;
         }
 
-        /* Блок сертификатов скрыт изначально */
         .signature-hidden {
             display: none;
         }
@@ -142,7 +138,7 @@
             display: block;
         }
 
-        /* Футер */
+        /* Футер с белыми полосами (как на 1-2 скринах) */
         .desktop-footer {
             display: flex;
             align-items: center;
@@ -156,9 +152,10 @@
         .desktop-footer-icons {
             display: flex;
             align-items: center;
+            gap: 16px;
         }
 
-        .footer-logo-item {
+        .footer-logo-group {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -171,18 +168,21 @@
             background-color: #ffffff;
         }
 
+        /* Специально для логотипа ДИТ, чтобы сохранить отступ */
+        .footer-logo-group.dit {
+            margin-left: 16px;
+        }
+
         .desktop-footer-text {
             color: #696969;
             white-space: pre-line;
-            margin: 0 15px;
+            margin: 0 16px;
+            font-size: 14px;
+            line-height: 1.4;
         }
 
         .desktop-footer-icon {
-            max-height: 64px;
-        }
-
-        .ml-32 {
-            margin-left: 32px;
+            max-height: 48px;
         }
 
         @media (max-width: 768px) {
@@ -205,9 +205,9 @@
             .desktop-footer-icons {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 16px;
+                gap: 24px;
             }
-            .ml-32 {
+            .footer-logo-group.dit {
                 margin-left: 0;
             }
         }
@@ -241,7 +241,6 @@
                 </div>
             </div>
 
-            <!-- Кнопка "Сведения об ЭП" — после нажатия пропадает -->
             <div class="signature-button-wrapper" id="epButtonWrapper">
                 <button class="signature-button" id="toggleEpButton">
                     <span class="signature-button__icon"></span>
@@ -249,16 +248,10 @@
                 </button>
             </div>
 
-            <!-- Блок сертификатов (скрыт изначально) -->
             <div id="signaturesContainer" class="signature-hidden">
                 <div class="signature-block">
                     <div class="xslt_signature">
                         <div class="signature-title">Сертификат медицинского работника</div>
-                        <!-- Убрано лишнее слово "Сертификат" из пункта -->
-                        <!-- <div class="signature-field"> 
-                            <div class="signature-field-label">Сертификат</div>
-                            <div class="signature-field-value" id="doctorCert">...</div>
-                        </div> -->
                         <div class="signature-field">
                             <div class="signature-field-value" id="doctorCert">1832820349536861278881725538315849685825</div>
                         </div>
@@ -274,11 +267,6 @@
 
                     <div class="xslt_signature">
                         <div class="signature-title">Сертификат медицинской организации</div>
-                        <!-- Убрано лишнее слово "Сертификат" из пункта -->
-                        <!-- <div class="signature-field">
-                            <div class="signature-field-label">Сертификат</div>
-                            <div class="signature-field-value" id="orgCert">...</div>
-                        </div> -->
                         <div class="signature-field">
                             <div class="signature-field-value" id="orgCert">96403703493897758531285374117963780380</div>
                         </div>
@@ -304,24 +292,24 @@
         </div>
     </div>
 
-    <!-- Футер с белыми полосками -->
+    <!-- Футер с белыми полосами (точная копия вашего 1-го скрина) -->
     <div class="desktop-footer">
-        <div class="footer-logo-item">
+        <div class="footer-logo-group">
             <img src="emias_logo_color.svg" alt="ЕМИАС">
             <div class="white-bar"></div>
         </div>
         <div class="desktop-footer-icons">
-            <div class="footer-logo-item">
+            <div class="footer-logo-group">
                 <img src="mosru-logo.svg" alt="mos.ru">
                 <div class="white-bar"></div>
             </div>
-            <div class="footer-logo-item">
-                <img src="dit2x.svg" alt="ДИТ" class="ml-32">
+            <div class="footer-logo-group">
+                <img src="dit2x.svg" alt="ДИТ">
                 <div class="white-bar"></div>
             </div>
             <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
-            <div class="footer-logo-item">
-                <img src="mosmedlogo.svg" alt="Московская медицина" class="ml-32 desktop-footer-icon">
+            <div class="footer-logo-group">
+                <img src="mosmedlogo.svg" alt="Московская медицина" class="desktop-footer-icon">
                 <div class="white-bar"></div>
             </div>
         </div>
@@ -329,22 +317,18 @@
 </div>
 
 <script>
-    // Кнопка "Сведения об ЭП" — при нажатии пропадает навсегда, показываем сертификаты
     const toggleButton = document.getElementById('toggleEpButton');
     const epButtonWrapper = document.getElementById('epButtonWrapper');
     const signaturesContainer = document.getElementById('signaturesContainer');
 
     if (toggleButton && epButtonWrapper && signaturesContainer) {
         toggleButton.addEventListener('click', function() {
-            // Показываем сертификаты
             signaturesContainer.classList.remove('signature-hidden');
             signaturesContainer.classList.add('signature-visible');
-            // Прячем кнопку навсегда
             epButtonWrapper.classList.add('ep-button-wrapper--hidden');
         });
     }
 
-    // Получение параметров из URL
     function getUrlParameter(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
