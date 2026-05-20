@@ -158,6 +158,19 @@
             align-items: center;
         }
 
+        .footer-logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .white-bar {
+            width: 100%;
+            height: 2px;
+            background-color: #ffffff;
+        }
+
         .desktop-footer-text {
             color: #696969;
             white-space: pre-line;
@@ -241,8 +254,12 @@
                 <div class="signature-block">
                     <div class="xslt_signature">
                         <div class="signature-title">Сертификат медицинского работника</div>
-                        <div class="signature-field">
+                        <!-- Убрано лишнее слово "Сертификат" из пункта -->
+                        <!-- <div class="signature-field"> 
                             <div class="signature-field-label">Сертификат</div>
+                            <div class="signature-field-value" id="doctorCert">...</div>
+                        </div> -->
+                        <div class="signature-field">
                             <div class="signature-field-value" id="doctorCert">1832820349536861278881725538315849685825</div>
                         </div>
                         <div class="signature-field">
@@ -257,8 +274,12 @@
 
                     <div class="xslt_signature">
                         <div class="signature-title">Сертификат медицинской организации</div>
-                        <div class="signature-field">
+                        <!-- Убрано лишнее слово "Сертификат" из пункта -->
+                        <!-- <div class="signature-field">
                             <div class="signature-field-label">Сертификат</div>
+                            <div class="signature-field-value" id="orgCert">...</div>
+                        </div> -->
+                        <div class="signature-field">
                             <div class="signature-field-value" id="orgCert">96403703493897758531285374117963780380</div>
                         </div>
                         <div class="signature-field">
@@ -283,13 +304,26 @@
         </div>
     </div>
 
+    <!-- Футер с белыми полосками -->
     <div class="desktop-footer">
-        <img src="emias_logo_color.svg" alt="ЕМИАС">
+        <div class="footer-logo-item">
+            <img src="emias_logo_color.svg" alt="ЕМИАС">
+            <div class="white-bar"></div>
+        </div>
         <div class="desktop-footer-icons">
-            <img src="mosru-logo.svg" alt="mos.ru">
-            <img src="dit2x.svg" alt="ДИТ" class="ml-32">
+            <div class="footer-logo-item">
+                <img src="mosru-logo.svg" alt="mos.ru">
+                <div class="white-bar"></div>
+            </div>
+            <div class="footer-logo-item">
+                <img src="dit2x.svg" alt="ДИТ" class="ml-32">
+                <div class="white-bar"></div>
+            </div>
             <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
-            <img src="mosmedlogo.svg" alt="Московская медицина" class="ml-32 desktop-footer-icon">
+            <div class="footer-logo-item">
+                <img src="mosmedlogo.svg" alt="Московская медицина" class="ml-32 desktop-footer-icon">
+                <div class="white-bar"></div>
+            </div>
         </div>
     </div>
 </div>
