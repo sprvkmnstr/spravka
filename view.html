@@ -21,11 +21,20 @@
             height: 100%;
         }
 
+        /* Шапка */
         .header {
-            padding: 30px 0;
+            padding: 30px 0 20px 0;
             max-width: 1180px;
             width: 90%;
             margin: 0 auto;
+        }
+
+        /* БОЛЬШАЯ ГОРИЗОНТАЛЬНАЯ ПОЛОСА ПОД ШАПКОЙ */
+        .top-divider {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            margin: 0;
         }
 
         .main {
@@ -138,21 +147,29 @@
             display: block;
         }
 
-        /* Футер с белыми полосами (как на 1-2 скринах) */
+        /* Футер */
         .desktop-footer {
             display: flex;
             align-items: center;
-            padding: 76px 0;
+            padding: 30px 0 30px 0;
             max-width: 1180px;
             width: 90%;
             margin: 0 auto;
             justify-content: space-between;
         }
 
+        /* БОЛЬШАЯ ГОРИЗОНТАЛЬНАЯ ПОЛОСА НАД ФУТЕРОМ */
+        .bottom-divider {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            margin: 0;
+        }
+
         .desktop-footer-icons {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 32px;
         }
 
         .footer-logo-group {
@@ -160,17 +177,6 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
-        }
-
-        .white-bar {
-            width: 100%;
-            height: 2px;
-            background-color: #ffffff;
-        }
-
-        /* Специально для логотипа ДИТ, чтобы сохранить отступ */
-        .footer-logo-group.dit {
-            margin-left: 16px;
         }
 
         .desktop-footer-text {
@@ -188,7 +194,6 @@
         @media (max-width: 768px) {
             .header {
                 padding: 20px 16px;
-                width: 100%;
             }
             .main {
                 padding: 24px 16px;
@@ -198,7 +203,7 @@
             }
             .desktop-footer {
                 flex-direction: column;
-                padding: 40px 16px;
+                padding: 30px 16px;
                 gap: 24px;
                 text-align: center;
             }
@@ -207,18 +212,19 @@
                 justify-content: center;
                 gap: 24px;
             }
-            .footer-logo-group.dit {
-                margin-left: 0;
-            }
         }
     </style>
 </head>
 <body>
 
 <div class="layout">
+    <!-- Шапка -->
     <div class="header">
         <img src="emias_logo_color.svg" alt="ЕМИАС">
     </div>
+
+    <!-- БОЛЬШАЯ ПОЛОСА ПОД ШАПКОЙ -->
+    <div class="top-divider"></div>
 
     <div class="main">
         <div class="content">
@@ -292,25 +298,24 @@
         </div>
     </div>
 
-    <!-- Футер с белыми полосами (точная копия вашего 1-го скрина) -->
+    <!-- БОЛЬШАЯ ПОЛОСА НАД ФУТЕРОМ -->
+    <div class="bottom-divider"></div>
+
+    <!-- Футер -->
     <div class="desktop-footer">
         <div class="footer-logo-group">
             <img src="emias_logo_color.svg" alt="ЕМИАС">
-            <div class="white-bar"></div>
         </div>
         <div class="desktop-footer-icons">
             <div class="footer-logo-group">
                 <img src="mosru-logo.svg" alt="mos.ru">
-                <div class="white-bar"></div>
             </div>
             <div class="footer-logo-group">
                 <img src="dit2x.svg" alt="ДИТ">
-                <div class="white-bar"></div>
             </div>
             <span class="desktop-footer-text">Департамент<br>информационных<br>технологий</span>
             <div class="footer-logo-group">
                 <img src="mosmedlogo.svg" alt="Московская медицина" class="desktop-footer-icon">
-                <div class="white-bar"></div>
             </div>
         </div>
     </div>
