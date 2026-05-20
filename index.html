@@ -77,6 +77,10 @@
                         <label>ФИО врача</label>
                         <input type="text" id="editDoctor" placeholder="Петрова Анна Сергеевна">
                     </div>
+                    <div class="field-group">
+                        <label>Наименование медицинской организации</label>
+                        <input type="text" id="editMedicalOrg" placeholder="ГП 8 Ф 2 (ГП 124)">
+                    </div>
                 </div>
                 <div class="col">
                     <h3>Сведения об ЭП (сертификаты)</h3>
@@ -119,7 +123,7 @@
         <div class="xslt_11859s">
             <div class="xslt_section">
                 <div class="xslt_text_bold">Наименование</div>
-                <div id="docName">Справка о временной нетрудоспособности студента... (полный текст)</div>
+                <div id="docName">Справка о временной нетрудоспособности студента, учащегося техникума, профессионально-технического училища, о болезни, карантине и прочих причинах отсутствия ребенка, посещающего школу, детское дошкольное учреждение</div>
             </div>
             <div class="xslt_section">
                 <div class="xslt_text_bold">Пациент</div>
@@ -195,23 +199,20 @@
     
     // Функция удлинения ссылки до нужной версии
     async function createLinkWithTargetVersion(longUrl, targetVersion) {
-        // Получаем короткую ссылку
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://clck.ru/--?url=' + encodeURIComponent(longUrl))}`;
         const response = await fetch(proxyUrl);
         const data = await response.json();
         let shortUrl = data.contents ? data.contents.trim() : null;
         if (!shortUrl || !shortUrl.startsWith('http')) return null;
         
-        // Определяем текущую длину и целевую
         let currentLen = shortUrl.length;
         let targetLen = 0;
-        if (targetVersion == 3) targetLen = 24;      // Version 3
-        else if (targetVersion == 4) targetLen = 42;  // Version 4 (средняя сетка)
-        else if (targetVersion == 5) targetLen = 65;  // Version 5
+        if (targetVersion == 3) targetLen = 24;
+        else if (targetVersion == 4) targetLen = 42;
+        else if (targetVersion == 5) targetLen = 65;
         
         if (currentLen >= targetLen) return shortUrl;
         
-        // Добавляем случайные параметры для удлинения
         const need = targetLen - currentLen;
         const randomParam = '&x=' + Math.random().toString(36).substring(2, 2 + need);
         const extendedUrl = shortUrl + randomParam;
@@ -235,7 +236,17 @@
             });
         } catch(e) {}
         
-        const size = 500;
+        // НАСТРОЙКИ РАМКИ И ЛОГОТИПА (меняйте здесь для лучшего сканирования)
+        const size = 500;                // общий размер QR в пикселях
+        const framePercent = 0.28;      // рамка 28% от QR (уменьшил для лучшего сканирования)
+        const logoPercent = 0.72;       // логотип 72% от рамки
+        const cornerRadiusPercent = 0.12; // скругление 12% от рамки
+        
+        const frameSize = Math.round(size * framePercent);
+        const logoSize = Math.round(frameSize * logoPercent);
+        const radius = Math.round(frameSize * cornerRadiusPercent);
+        const padding = Math.round((frameSize - logoSize) / 2);
+        
         const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&ecc=L&version=${targetVersion}`;
         
         let qrImage = await new Promise((resolve, reject) => {
@@ -253,11 +264,6 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(qrImage, 0, 0, size, size);
         
-        // Рамка (33% от QR)
-        const frameSize = Math.round(size * 0.33);
-        const logoSize = Math.round(frameSize * 0.70);
-        const radius = Math.round(frameSize * 0.15);
-        const padding = Math.round((frameSize - logoSize) / 2);
         const frameX = (size - frameSize) / 2;
         const frameY = (size - frameSize) / 2;
         
@@ -272,6 +278,7 @@
         ctx.lineTo(frameX, frameY + radius);
         ctx.quadraticCurveTo(frameX, frameY, frameX + radius, frameY);
         ctx.closePath();
+        
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.strokeStyle = '#cccccc';
@@ -320,6 +327,7 @@
         document.getElementById('patientName').innerText = document.getElementById('editPatient').value || 'Ксения Викторовна П.';
         document.getElementById('issueDate').innerText = document.getElementById('editDate').value || '2026-03-02';
         document.getElementById('doctorName').innerText = document.getElementById('editDoctor').value || 'Цицава Людмила';
+        document.getElementById('orgName').innerText = document.getElementById('editMedicalOrg').value || defaultData.medicalOrg;
         document.getElementById('doctorCert').innerText = document.getElementById('editDoctorCert').value || defaultData.doctorCert;
         document.getElementById('doctorValid').innerText = document.getElementById('editDoctorValid').value || defaultData.doctorValid;
         document.getElementById('orgCert').innerText = document.getElementById('editOrgCert').value || defaultData.orgCert;
@@ -327,7 +335,6 @@
         document.getElementById('ogrn').innerText = document.getElementById('editOgrn').value || defaultData.ogrn;
         document.getElementById('address').innerText = document.getElementById('editAddress').value || defaultData.address;
         document.getElementById('orgFullName').innerText = defaultData.orgFullName;
-        document.getElementById('orgName').innerText = defaultData.medicalOrg;
     }
     
     function showStatus(msg, type) {
@@ -381,7 +388,6 @@
         }
     });
     
-    // Toggle для ЭП
     document.getElementById('toggleEpButton').addEventListener('click', () => {
         const cont = document.getElementById('signaturesContainer');
         const wrapper = document.getElementById('epButtonWrapper');
@@ -392,6 +398,7 @@
     
     // Инициализация полей
     updateDisplayData();
+    document.getElementById('editMedicalOrg').value = defaultData.medicalOrg;
     document.getElementById('editDoctorCert').value = defaultData.doctorCert;
     document.getElementById('editDoctorValid').value = defaultData.doctorValid;
     document.getElementById('editOrgCert').value = defaultData.orgCert;
