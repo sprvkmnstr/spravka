@@ -68,8 +68,8 @@
             <label>🎯 Целевая версия QR (плотность сетки):</label>
             <select id="qrVersionSelect">
                 <option value="3">Version 3 (29×29) — крупная сетка</option>
-                <option value="4">Version 4 (33×33) — средняя сетка</option>
-                <option value="5" selected>Version 5 (37×37) — мелкая сетка (выбрана)</option>
+                <option value="4" selected>Version 4 (33×33) — средняя сетка (выбрана)</option>
+                <option value="5">Version 5 (37×37) — мелкая сетка</option>
             </select>
         </div>
         
@@ -129,7 +129,7 @@
             
             <div class="action-buttons">
                 <button id="applyBtn">✅ Применить данные</button>
-                <button id="genLinkBtn" style="background:#fa0;">🔗 Создать ссылку (под Version 5)</button>
+                <button id="genLinkBtn" style="background:#fa0;">🔗 Создать ссылку (под Version 4)</button>
                 <button id="showQrBtn" class="qr-button">📱 Показать QR-код</button>
             </div>
             <div id="statusMsg" class="status-msg"></div>
@@ -213,7 +213,7 @@
 </div>
 
 <script>
-    // --- НАСТРОЙКИ QR: Version 5, длина ссылки ~65-70 символов ---
+    // --- НАСТРОЙКИ QR: Version 4, длина ссылки ~42-45 символов, БЕЗ ЛОГОТИПА ---
     let currentFinalUrl = null;
     let currentQrDataUrl = null;
     
@@ -228,52 +228,33 @@
         ogrn: '1037739410928'
     };
     
-    // Функция создания ссылки с нужной длиной для Version 5
+    // Функция создания ссылки с нужной длиной для Version 4
     async function createLinkWithTargetVersion(longUrl, targetVersion) {
-        // Получаем короткую ссылку от clck.ru
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://clck.ru/--?url=' + encodeURIComponent(longUrl))}`;
         const response = await fetch(proxyUrl);
         const data = await response.json();
         let shortUrl = data.contents ? data.contents.trim() : null;
         if (!shortUrl || !shortUrl.startsWith('http')) return null;
         
-        // Целевая длина для Version 5: 68-72 символа
         let targetLen = 0;
         if (targetVersion == 3) targetLen = 24;
-        else if (targetVersion == 4) targetLen = 42;
-        else if (targetVersion == 5) targetLen = 70;  // ← для Version 5 нужна ссылка ~70 символов
+        else if (targetVersion == 4) targetLen = 45;  // ← для Version 4
+        else if (targetVersion == 5) targetLen = 70;
         
-        // Если короткая ссылка уже достаточно длинная
         if (shortUrl.length >= targetLen) return shortUrl;
         
-        // Добавляем случайные параметры до нужной длины
         const need = targetLen - shortUrl.length;
         const randomParams = '&' + Array(need).fill('x').join('') + '=' + Math.random().toString(36).substring(2, 6);
-        const extendedUrl = shortUrl + randomParams;
-        return extendedUrl;
+        return shortUrl + randomParams;
     }
     
-    // Генерация QR (Version 5)
+    // Генерация QR (Version 4, БЕЗ рамки и логотипа)
     async function generateQR(url, targetVersion, containerId) {
         const container = document.getElementById(containerId);
         container.innerHTML = '<div style="text-align:center;">⏳ Генерация...</div>';
         
-        // Загружаем логотип
-        let logoImg = null;
-        try {
-            logoImg = await new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = "Anonymous";
-                img.onload = () => resolve(img);
-                img.onerror = () => reject();
-                img.src = 'logo.png';
-                setTimeout(() => reject(), 2000);
-            });
-        } catch(e) {}
-        
         const size = 500;
-        // Принудительно используем Version 5
-        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&ecc=L&version=5`;
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&ecc=L&version=${targetVersion}`;
         
         let qrImage = null;
         try {
@@ -296,49 +277,16 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(qrImage, 0, 0, size, size);
         
-        // Рамка (чуть меньше для Version 5, чтобы лучше сканировалось)
-        const frameSize = Math.round(size * 0.26);
-        const logoSize = Math.round(frameSize * 0.70);
-        const radius = Math.round(frameSize * 0.12);
-        const padding = Math.round((frameSize - logoSize) / 2);
-        const frameX = (size - frameSize) / 2;
-        const frameY = (size - frameSize) / 2;
+        // БЕЗ РАМКИ И БЕЗ ЛОГОТИПА — только чистый QR
         
-        ctx.beginPath();
-        ctx.moveTo(frameX + radius, frameY);
-        ctx.lineTo(frameX + frameSize - radius, frameY);
-        ctx.quadraticCurveTo(frameX + frameSize, frameY, frameX + frameSize, frameY + radius);
-        ctx.lineTo(frameX + frameSize, frameY + frameSize - radius);
-        ctx.quadraticCurveTo(frameX + frameSize, frameY + frameSize, frameX + frameSize - radius, frameY + frameSize);
-        ctx.lineTo(frameX + radius, frameY + frameSize);
-        ctx.quadraticCurveTo(frameX, frameY + frameSize, frameX, frameY + frameSize - radius);
-        ctx.lineTo(frameX, frameY + radius);
-        ctx.quadraticCurveTo(frameX, frameY, frameX + radius, frameY);
-        ctx.closePath();
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = '#cccccc';
-        ctx.stroke();
-        
-        if (logoImg) {
-            ctx.drawImage(logoImg, frameX + padding, frameY + padding, logoSize, logoSize);
-        } else {
-            ctx.font = `${logoSize * 0.6}px "Segoe UI Emoji"`;
-            ctx.fillStyle = '#E31E24';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('❤️', size/2, size/2);
-        }
-        
-        const img = document.createElement('img');
-        img.src = canvas.toDataURL('image/png');
-        img.style.width = '250px';
-        img.style.border = '1px solid #ddd';
-        img.style.padding = '8px';
-        img.style.background = 'white';
+        const resultImg = document.createElement('img');
+        resultImg.src = canvas.toDataURL('image/png');
+        resultImg.style.width = '250px';
+        resultImg.style.border = '1px solid #ddd';
+        resultImg.style.padding = '8px';
+        resultImg.style.background = 'white';
         container.innerHTML = '';
-        container.appendChild(img);
+        container.appendChild(resultImg);
         return canvas.toDataURL('image/png');
     }
     
@@ -382,18 +330,16 @@
         el.style.display = 'block';
     }
     
-    // Применить данные
     document.getElementById('applyBtn').addEventListener('click', () => {
         updateDisplayData();
         showStatus('✅ Данные обновлены', 'success');
     });
     
-    // Создать ссылку (под Version 5)
     document.getElementById('genLinkBtn').addEventListener('click', async () => {
         updateDisplayData();
         const longUrl = buildLongUrl();
-        const targetVersion = 5;  // Принудительно Version 5
-        showStatus('🔗 Создаю ссылку под Version 5...', 'info');
+        const targetVersion = 4;
+        showStatus('🔗 Создаю ссылку под Version 4...', 'info');
         const finalUrl = await createLinkWithTargetVersion(longUrl, targetVersion);
         if (finalUrl) {
             currentFinalUrl = finalUrl;
@@ -404,25 +350,24 @@
         }
     });
     
-    // Показать QR
     document.getElementById('showQrBtn').addEventListener('click', async () => {
         if (!currentFinalUrl) {
             showStatus('⚠️ Сначала создайте ссылку', 'error');
             return;
         }
-        showStatus('📱 Генерирую QR (Version 5)...', 'info');
-        currentQrDataUrl = await generateQR(currentFinalUrl, 5, 'qrImage');
+        const targetVersion = parseInt(document.getElementById('qrVersionSelect').value);
+        showStatus('📱 Генерирую QR (Version ' + targetVersion + ')...', 'info');
+        currentQrDataUrl = await generateQR(currentFinalUrl, targetVersion, 'qrImage');
         if (currentQrDataUrl) {
             document.getElementById('qrContainer').style.display = 'block';
             showStatus('✅ QR готов!', 'success');
         }
     });
     
-    // Скачать
     document.getElementById('downloadBtn').addEventListener('click', () => {
         if (currentQrDataUrl) {
             const a = document.createElement('a');
-            a.download = 'QR_095_Version5.png';
+            a.download = 'QR_095.png';
             a.href = currentQrDataUrl;
             a.click();
         } else {
@@ -430,7 +375,6 @@
         }
     });
     
-    // Кнопка "Сведения об ЭП" в превью
     document.getElementById('toggleEpButton').addEventListener('click', () => {
         const cont = document.getElementById('signaturesContainer');
         const wrapper = document.getElementById('epButtonWrapper');
@@ -439,7 +383,6 @@
         wrapper.classList.add('ep-button-wrapper--hidden');
     });
     
-    // Инициализация полей
     updateDisplayData();
     document.getElementById('editMedicalOrg').value = defaultData.medicalOrg;
     document.getElementById('editDoctorCert').value = defaultData.doctorCert;
