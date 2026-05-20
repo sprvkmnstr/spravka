@@ -335,4 +335,96 @@
             medicalOrg: document.getElementById('orgName').innerText,
             orgName: document.getElementById('orgFullName').innerText,
             address: document.getElementById('address').innerText,
-            ogrn:
+            ogrn: document.getElementById('ogrn').innerText
+        });
+        return base + '?' + params.toString();
+    }
+    
+    function updateDisplayData() {
+        document.getElementById('patientName').innerText = document.getElementById('editPatient').value || 'Ксения Викторовна П.';
+        document.getElementById('issueDate').innerText = document.getElementById('editDate').value || '2026-03-02';
+        document.getElementById('doctorName').innerText = document.getElementById('editDoctor').value || 'Цицава Людмила';
+        document.getElementById('orgName').innerText = document.getElementById('editMedicalOrg').value || defaultData.medicalOrg;
+        document.getElementById('doctorCert').innerText = document.getElementById('editDoctorCert').value || defaultData.doctorCert;
+        document.getElementById('doctorValid').innerText = document.getElementById('editDoctorValid').value || defaultData.doctorValid;
+        document.getElementById('orgCert').innerText = document.getElementById('editOrgCert').value || defaultData.orgCert;
+        document.getElementById('orgValid').innerText = document.getElementById('editOrgValid').value || defaultData.orgValid;
+        document.getElementById('ogrn').innerText = document.getElementById('editOgrn').value || defaultData.ogrn;
+        document.getElementById('address').innerText = document.getElementById('editAddress').value || defaultData.address;
+        document.getElementById('orgFullName').innerText = document.getElementById('editOrgFullName').value || defaultData.orgFullName;
+    }
+    
+    function showStatus(msg, type) {
+        const el = document.getElementById('statusMsg');
+        el.className = 'status-msg ' + type;
+        el.innerHTML = msg;
+        setTimeout(() => el.style.display = 'none', 4000);
+        el.style.display = 'block';
+    }
+    
+    // --- Обработчики ---
+    document.getElementById('applyBtn').addEventListener('click', () => {
+        updateDisplayData();
+        showStatus('✅ Данные обновлены', 'success');
+    });
+    
+    document.getElementById('genLinkBtn').addEventListener('click', async () => {
+        updateDisplayData();
+        const longUrl = buildLongUrl();
+        const targetVersion = parseInt(document.getElementById('qrVersionSelect').value);
+        showStatus('🔗 Создаю ссылку...', 'info');
+        const finalUrl = await createLinkWithTargetVersion(longUrl, targetVersion);
+        if (finalUrl) {
+            currentFinalUrl = finalUrl;
+            document.getElementById('qrLink').innerText = 'Готовая ссылка: ' + finalUrl;
+            showStatus('✅ Ссылка создана!', 'success');
+        } else {
+            showStatus('❌ Ошибка создания ссылки', 'error');
+        }
+    });
+    
+    document.getElementById('showQrBtn').addEventListener('click', async () => {
+        if (!currentFinalUrl) {
+            showStatus('⚠️ Сначала создайте ссылку', 'error');
+            return;
+        }
+        const targetVersion = parseInt(document.getElementById('qrVersionSelect').value);
+        showStatus('📱 Генерирую QR...', 'info');
+        currentQrDataUrl = await generateQR(currentFinalUrl, targetVersion, 'qrImage');
+        if (currentQrDataUrl) {
+            document.getElementById('qrContainer').style.display = 'block';
+            showStatus('✅ QR готов!', 'success');
+        }
+    });
+    
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+        if (currentQrDataUrl) {
+            const a = document.createElement('a');
+            a.download = 'QR_095.png';
+            a.href = currentQrDataUrl;
+            a.click();
+        }
+    });
+    
+    // Кнопка Сведения об ЭП в превью
+    document.getElementById('toggleEpButton').addEventListener('click', () => {
+        const cont = document.getElementById('signaturesContainer');
+        const wrapper = document.getElementById('epButtonWrapper');
+        cont.classList.remove('signature-hidden');
+        cont.classList.add('signature-visible');
+        wrapper.classList.add('ep-button-wrapper--hidden');
+    });
+    
+    // Инициализация полей
+    updateDisplayData();
+    document.getElementById('editMedicalOrg').value = defaultData.medicalOrg;
+    document.getElementById('editDoctorCert').value = defaultData.doctorCert;
+    document.getElementById('editDoctorValid').value = defaultData.doctorValid;
+    document.getElementById('editOrgCert').value = defaultData.orgCert;
+    document.getElementById('editOrgValid').value = defaultData.orgValid;
+    document.getElementById('editOrgFullName').value = defaultData.orgFullName;
+    document.getElementById('editOgrn').value = defaultData.ogrn;
+    document.getElementById('editAddress').value = defaultData.address;
+</script>
+</body>
+</html>
